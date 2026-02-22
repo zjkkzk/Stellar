@@ -27,6 +27,9 @@
     <string name="no_root_permission">لا يوجد صلاحية Root</string>
     <string name="copied_to_clipboard">تم النسخ إلى الحافظة</string>
     <string name="copy_failed">فشل النسخ</string>
+    <string name="ip_port_copied">تم نسخ %s إلى الحافظة</string>
+    <string name="no_ip_available">تعذر الحصول على عنوان IP</string>
+    <string name="tcpip_port_not_configured">لم يتم تكوين منفذ TCP/IP</string>
 
     <!-- Theme -->
     <string name="theme_light">فاتح</string>

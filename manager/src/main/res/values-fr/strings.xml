@@ -27,6 +27,9 @@
     <string name="no_root_permission">Pas d\'accès Root</string>
     <string name="copied_to_clipboard">Copié dans le presse-papiers</string>
     <string name="copy_failed">Échec de la copie</string>
+    <string name="ip_port_copied">%s copié dans le presse-papiers</string>
+    <string name="no_ip_available">Impossible d\'obtenir l\'adresse IP</string>
+    <string name="tcpip_port_not_configured">Port TCP/IP non configuré</string>
 
     <!-- Theme -->
     <string name="theme_light">Clair</string>

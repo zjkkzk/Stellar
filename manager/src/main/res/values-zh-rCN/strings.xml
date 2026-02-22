@@ -27,6 +27,9 @@
     <string name="no_root_permission">没有 Root 权限</string>
     <string name="copied_to_clipboard">已复制到剪贴板</string>
     <string name="copy_failed">复制失败</string>
+    <string name="ip_port_copied">%s 已复制到剪贴板</string>
+    <string name="no_ip_available">无法获取 IP 地址</string>
+    <string name="tcpip_port_not_configured">未配置 TCP/IP 端口</string>
 
     <!-- Theme -->
     <string name="theme_light">浅色</string>

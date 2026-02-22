@@ -108,6 +108,8 @@ import roro.stellar.manager.ui.theme.AppShape
 import roro.stellar.manager.ui.theme.AppSpacing
 import roro.stellar.manager.ui.theme.ThemeMode
 import roro.stellar.manager.ui.theme.ThemePreferences
+import roro.stellar.manager.compat.ClipboardUtils
+import roro.stellar.manager.util.EnvironmentUtils
 import roro.stellar.manager.util.PortBlacklistUtils
 import com.topjohnwu.superuser.Shell
 import kotlinx.coroutines.Dispatchers
@@ -336,7 +338,23 @@ fun SettingsScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             IconContainer(
-                                icon = Icons.Default.SettingsEthernet
+                                icon = Icons.Default.SettingsEthernet,
+                                modifier = Modifier.combinedClickable(
+                                    onClick = {},
+                                    onLongClick = {
+                                        val ip = EnvironmentUtils.getWifiIpAddress()
+                                        val port = tcpipPort.toIntOrNull()?.takeIf { tcpipPortEnabled && it in 1..65535 }
+                                        when {
+                                            ip == null -> Toast.makeText(context, context.getString(R.string.no_ip_available), Toast.LENGTH_SHORT).show()
+                                            port == null -> Toast.makeText(context, context.getString(R.string.tcpip_port_not_configured), Toast.LENGTH_SHORT).show()
+                                            else -> {
+                                                val text = "adb connect $ip:$port"
+                                                ClipboardUtils.put(context, text)
+                                                Toast.makeText(context, context.getString(R.string.ip_port_copied, text), Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
+                                    }
+                                )
                             )
 
                             Spacer(modifier = Modifier.width(12.dp))

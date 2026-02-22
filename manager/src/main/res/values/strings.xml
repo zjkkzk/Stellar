@@ -47,6 +47,9 @@
     <string name="root_start_subtitle">Start Stellar service via root</string>
     <string name="wireless_debugging">Wireless Debugging</string>
     <string name="wireless_debugging_subtitle">Start Stellar service via wireless debugging</string>
+    <string name="ip_port_copied">%s copied to clipboard</string>
+    <string name="no_ip_available">No IP address available</string>
+    <string name="tcpip_port_not_configured">TCP/IP port not configured</string>
     <string name="wired_adb">Wired ADB</string>
     <string name="wired_adb_subtitle">Start Stellar service via ADB</string>
     <string name="view">View</string>

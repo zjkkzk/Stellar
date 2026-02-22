@@ -27,6 +27,9 @@
     <string name="no_root_permission">Нет Root-доступа</string>
     <string name="copied_to_clipboard">Скопировано в буфер обмена</string>
     <string name="copy_failed">Не удалось скопировать</string>
+    <string name="ip_port_copied">%s скопировано в буфер обмена</string>
+    <string name="no_ip_available">Не удалось получить IP-адрес</string>
+    <string name="tcpip_port_not_configured">Порт TCP/IP не настроен</string>
 
     <!-- Theme -->
     <string name="theme_light">Светлая</string>

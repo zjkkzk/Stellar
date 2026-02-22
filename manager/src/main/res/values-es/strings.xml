@@ -27,6 +27,9 @@
     <string name="no_root_permission">Sin acceso Root</string>
     <string name="copied_to_clipboard">Copiado al portapapeles</string>
     <string name="copy_failed">Error al copiar</string>
+    <string name="ip_port_copied">%s copiado al portapapeles</string>
+    <string name="no_ip_available">No se puede obtener la dirección IP</string>
+    <string name="tcpip_port_not_configured">Puerto TCP/IP no configurado</string>
 
     <!-- Theme -->
     <string name="theme_light">Claro</string>
