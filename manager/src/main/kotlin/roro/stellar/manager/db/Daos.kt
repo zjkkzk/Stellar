@@ -16,7 +16,7 @@ interface CommandDao {
 
 @Dao
 interface LogDao {
-    @Query("SELECT line FROM logs ORDER BY id ASC")
+    @Query("SELECT line FROM logs ORDER BY id DESC")
     fun getAll(): List<String>
 
     @Insert

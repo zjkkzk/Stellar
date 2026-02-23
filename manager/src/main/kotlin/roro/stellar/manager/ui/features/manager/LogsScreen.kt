@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -111,7 +112,7 @@ internal fun LogsScreen(
             isLoading = true
             try {
                 val result = withContext(Dispatchers.IO) {
-                    db.logDao().getAll().reversed()
+                    db.logDao().getAll()
                 }
                 logs = result
             } catch (e: Exception) {
@@ -143,7 +144,7 @@ internal fun LogsScreen(
         if (logs.isEmpty()) {
             Toast.makeText(context, context.getString(R.string.no_logs_to_copy), Toast.LENGTH_SHORT).show()
         } else {
-            val logsText = logs.reversed().joinToString("\n")
+            val logsText = logs.joinToString("\n")
             if (ClipboardUtils.put(context, logsText)) {
                 Toast.makeText(context, context.getString(R.string.logs_copied), Toast.LENGTH_SHORT).show()
             }
@@ -188,11 +189,11 @@ internal fun LogsScreen(
                         .fillMaxHeight()
                 ) {
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                    if (filteredLogs.isEmpty() && !isLoading) {
-                        EmptyLogsView()
-                    } else {
-                        LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
-                            items(filteredLogs) { log -> LogItem(log = log) }
+                    when {
+                        isLoading -> LoadingView()
+                        filteredLogs.isEmpty() -> EmptyLogsView()
+                        else -> LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+                            items(filteredLogs, key = { it }) { log -> LogItem(log = log) }
                         }
                     }
                 }
@@ -305,11 +306,11 @@ private fun LogsContent(
         LogFilterBar(selectedLevels = selectedLevels, onLevelToggle = onLevelToggle)
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
 
-        if (filteredLogs.isEmpty() && !isLoading) {
-            EmptyLogsView()
-        } else {
-            LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
-                items(filteredLogs) { log -> LogItem(log = log) }
+        when {
+            isLoading -> LoadingView()
+            filteredLogs.isEmpty() -> EmptyLogsView()
+            else -> LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+                items(filteredLogs, key = { it }) { log -> LogItem(log = log) }
             }
         }
     }
@@ -366,6 +367,16 @@ private fun SearchBar(searchQuery: String, onSearchQueryChange: (String) -> Unit
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun LoadingView() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
     }
 }
 
@@ -564,8 +575,10 @@ private fun getLevelColor(level: String): Color = when (level) {
     else -> MaterialTheme.colorScheme.onSurfaceVariant
 }
 
+private val LOG_ENTRY_REGEX = Regex("""^(\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}) [VDIWEA]/([^:]+): (.*)$""")
+
 private fun parseLogEntry(log: String): LogParts {
-    val regex = Regex("""^(\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}) [VDIWEA]/([^:]+): (.*)$""")
+    val regex = LOG_ENTRY_REGEX
     val match = regex.find(log)
 
     return if (match != null) {
