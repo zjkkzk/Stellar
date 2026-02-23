@@ -88,33 +88,6 @@ fun StellarDialog(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StellarConfirmDialog(
-    onDismissRequest: () -> Unit,
-    title: String,
-    message: String,
-    confirmText: String = stringResource(R.string.confirm),
-    dismissText: String = stringResource(R.string.cancel),
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit = onDismissRequest
-) {
-    StellarDialog(
-        onDismissRequest = onDismissRequest,
-        title = title,
-        confirmText = confirmText,
-        dismissText = dismissText,
-        onConfirm = onConfirm,
-        onDismiss = onDismiss
-    ) {
-        Text(
-            text = message,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
 fun StellarInfoDialog(
     onDismissRequest: () -> Unit,
     title: String,

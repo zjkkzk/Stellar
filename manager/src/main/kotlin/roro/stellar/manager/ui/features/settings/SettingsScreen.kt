@@ -186,6 +186,25 @@ fun SettingsScreen(
     var downloadProgress by remember { mutableIntStateOf(0) }
     var downloadError by remember { mutableStateOf<String?>(null) }
 
+    val performCheckUpdate: (UpdateSource?) -> Unit = { source ->
+        isCheckingUpdate = true
+        scope.launch {
+            try {
+                val update = UpdateUtils.checkUpdate(source)
+                if (update != null && update.versionCode > BuildConfig.VERSION_CODE) {
+                    pendingUpdate = update
+                    showUpdateDialog = true
+                } else {
+                    Toast.makeText(context, context.getString(R.string.already_latest_version), Toast.LENGTH_SHORT).show()
+                }
+            } catch (_: Exception) {
+                Toast.makeText(context, context.getString(R.string.check_update_failed), Toast.LENGTH_SHORT).show()
+            } finally {
+                isCheckingUpdate = false
+            }
+        }
+    }
+
     var shizukuCompatEnabled by remember { mutableStateOf(preferences.getBoolean(SHIZUKU_COMPAT_ENABLED, true)) }
 
     LaunchedEffect(Unit) {
@@ -482,24 +501,7 @@ fun SettingsScreen(
 
                         UpdateCard(
                             isCheckingUpdate = isCheckingUpdate,
-                            onCheckUpdate = {
-                                isCheckingUpdate = true
-                                scope.launch {
-                                    try {
-                                        val update = UpdateUtils.checkUpdate()
-                                        if (update != null && update.versionCode > BuildConfig.VERSION_CODE) {
-                                            pendingUpdate = update
-                                            showUpdateDialog = true
-                                        } else {
-                                            Toast.makeText(context, context.getString(R.string.already_latest_version), Toast.LENGTH_SHORT).show()
-                                        }
-                                    } catch (_: Exception) {
-                                        Toast.makeText(context, context.getString(R.string.check_update_failed), Toast.LENGTH_SHORT).show()
-                                    } finally {
-                                        isCheckingUpdate = false
-                                    }
-                                }
-                            },
+                            onCheckUpdate = { performCheckUpdate(null) },
                             onLongClick = { showSourceDialog = true },
                             currentSource = currentSource,
                             modifier = Modifier.weight(1f).fillMaxHeight()
@@ -519,24 +521,7 @@ fun SettingsScreen(
                 item {
                     UpdateCard(
                         isCheckingUpdate = isCheckingUpdate,
-                        onCheckUpdate = {
-                            isCheckingUpdate = true
-                            scope.launch {
-                                try {
-                                    val update = UpdateUtils.checkUpdate()
-                                    if (update != null && update.versionCode > BuildConfig.VERSION_CODE) {
-                                        pendingUpdate = update
-                                        showUpdateDialog = true
-                                    } else {
-                                        Toast.makeText(context, context.getString(R.string.already_latest_version), Toast.LENGTH_SHORT).show()
-                                    }
-                                } catch (_: Exception) {
-                                    Toast.makeText(context, context.getString(R.string.check_update_failed), Toast.LENGTH_SHORT).show()
-                                } finally {
-                                    isCheckingUpdate = false
-                                }
-                            }
-                        },
+                        onCheckUpdate = { performCheckUpdate(null) },
                         onLongClick = { showSourceDialog = true },
                         currentSource = currentSource
                     )
@@ -707,24 +692,7 @@ fun SettingsScreen(
             onSourceSelected = { source ->
                 showSourceDialog = false
                 currentSource = source
-                isCheckingUpdate = true
-                scope.launch {
-                    try {
-                        val update = UpdateUtils.checkUpdate(source)
-                        if (update != null && update.versionCode > BuildConfig.VERSION_CODE) {
-                            pendingUpdate = update
-                            showUpdateDialog = true
-                        } else if (update != null) {
-                            Toast.makeText(context, context.getString(R.string.already_latest_version), Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(context, context.getString(R.string.check_update_failed), Toast.LENGTH_SHORT).show()
-                        }
-                    } catch (_: Exception) {
-                        Toast.makeText(context, context.getString(R.string.check_update_failed), Toast.LENGTH_SHORT).show()
-                    } finally {
-                        isCheckingUpdate = false
-                    }
-                }
+                performCheckUpdate(source)
             }
         )
     }

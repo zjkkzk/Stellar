@@ -85,6 +85,10 @@ internal fun LogsScreen(
     var selectedLevels by remember { mutableStateOf(setOf("V", "D", "I", "W", "E")) }
     var searchQuery by remember { mutableStateOf("") }
 
+    val onLevelToggle: (String) -> Unit = { level ->
+        selectedLevels = if (level in selectedLevels) selectedLevels - level else selectedLevels + level
+    }
+
     val filteredLogs = remember(logs, selectedLevels, searchQuery) {
         logs.filter { log ->
             val level = when {
@@ -175,13 +179,7 @@ internal fun LogsScreen(
                 ) {
                     SearchBar(searchQuery = searchQuery, onSearchQueryChange = { searchQuery = it })
                     Spacer(modifier = Modifier.height(8.dp))
-                    LogFilterBarVertical(selectedLevels = selectedLevels, onLevelToggle = { level ->
-                        selectedLevels = if (level in selectedLevels) {
-                            selectedLevels - level
-                        } else {
-                            selectedLevels + level
-                        }
-                    })
+                    LogFilterBarVertical(selectedLevels = selectedLevels, onLevelToggle = onLevelToggle)
                 }
 
                 Column(
@@ -205,13 +203,7 @@ internal fun LogsScreen(
                 searchQuery = searchQuery,
                 onSearchQueryChange = { searchQuery = it },
                 selectedLevels = selectedLevels,
-                onLevelToggle = { level ->
-                    selectedLevels = if (level in selectedLevels) {
-                        selectedLevels - level
-                    } else {
-                        selectedLevels + level
-                    }
-                },
+                onLevelToggle = onLevelToggle,
                 filteredLogs = filteredLogs,
                 isLoading = isLoading,
                 listState = listState
@@ -417,12 +409,48 @@ private fun EmptyLogsView() {
 }
 
 @Composable
+private fun LogFilterChip(
+    level: String,
+    name: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val levelColor = getLevelColor(level)
+    Surface(
+        onClick = onClick,
+        shape = AppShape.shapes.buttonSmall14,
+        color = if (isSelected) levelColor.copy(alpha = 0.12f)
+               else MaterialTheme.colorScheme.surfaceContainerHigh,
+        modifier = modifier
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(8.dp)
+                    .clip(AppShape.shapes.iconSmall)
+                    .background(if (isSelected) levelColor else levelColor.copy(alpha = 0.4f))
+            )
+            Text(
+                text = name,
+                style = MaterialTheme.typography.labelMedium,
+                color = if (isSelected) levelColor else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+private val LOG_LEVELS = listOf("V" to "Verbose", "D" to "Debug", "I" to "Info", "W" to "Warn", "E" to "Error")
+
+@Composable
 private fun LogFilterBar(
     selectedLevels: Set<String>,
     onLevelToggle: (String) -> Unit
 ) {
-    val levels = listOf("V" to "Verbose", "D" to "Debug", "I" to "Info", "W" to "Warn", "E" to "Error")
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -430,34 +458,8 @@ private fun LogFilterBar(
             .padding(horizontal = AppSpacing.screenHorizontalPadding, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        levels.forEach { (level, name) ->
-            val isSelected = level in selectedLevels
-            val levelColor = getLevelColor(level)
-
-            Surface(
-                onClick = { onLevelToggle(level) },
-                shape = AppShape.shapes.buttonSmall14,
-                color = if (isSelected) levelColor.copy(alpha = 0.12f)
-                       else MaterialTheme.colorScheme.surfaceContainerHigh
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .clip(AppShape.shapes.iconSmall)
-                            .background(if (isSelected) levelColor else levelColor.copy(alpha = 0.4f))
-                    )
-                    Text(
-                        text = name,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = if (isSelected) levelColor else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
+        LOG_LEVELS.forEach { (level, name) ->
+            LogFilterChip(level, name, level in selectedLevels, onClick = { onLevelToggle(level) })
         }
     }
 }
@@ -467,41 +469,12 @@ private fun LogFilterBarVertical(
     selectedLevels: Set<String>,
     onLevelToggle: (String) -> Unit
 ) {
-    val levels = listOf("V" to "Verbose", "D" to "Debug", "I" to "Info", "W" to "Warn", "E" to "Error")
-
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        levels.forEach { (level, name) ->
-            val isSelected = level in selectedLevels
-            val levelColor = getLevelColor(level)
-
-            Surface(
-                onClick = { onLevelToggle(level) },
-                shape = AppShape.shapes.buttonSmall14,
-                color = if (isSelected) levelColor.copy(alpha = 0.12f)
-                       else MaterialTheme.colorScheme.surfaceContainerHigh,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .clip(AppShape.shapes.iconSmall)
-                            .background(if (isSelected) levelColor else levelColor.copy(alpha = 0.4f))
-                    )
-                    Text(
-                        text = name,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = if (isSelected) levelColor else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
+        LOG_LEVELS.forEach { (level, name) ->
+            LogFilterChip(level, name, level in selectedLevels, onClick = { onLevelToggle(level) }, modifier = Modifier.fillMaxWidth())
         }
     }
 }

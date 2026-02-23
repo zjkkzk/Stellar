@@ -187,7 +187,6 @@ private fun MainScreenContent(
                     HomeScreen(
                         topAppBarState = topAppBarState,
                         homeViewModel = homeViewModel,
-                        appsViewModel = appsViewModel,
                         onNavigateToStarter = { isRoot, host, port, hasSecureSettings ->
                             context.startActivity(ManagerActivity.createStarterIntent(context, isRoot, host, port, hasSecureSettings))
                         }

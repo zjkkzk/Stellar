@@ -46,118 +46,59 @@ object UpdateUtils {
 
     suspend fun checkUpdate(source: UpdateSource? = null): AppUpdate? = withContext(Dispatchers.IO) {
         val actualSource = source ?: getPreferredSource()
-        when (actualSource) {
-            UpdateSource.GITHUB -> checkUpdateFromGitHub()
-            UpdateSource.GITEE -> checkUpdateFromGitee()
+        val url = when (actualSource) {
+            UpdateSource.GITHUB -> GITHUB_API_URL
+            UpdateSource.GITEE -> GITEE_API_URL
         }
+        fetchUpdate(url, actualSource.displayName)
     }
 
-    private suspend fun checkUpdateFromGitHub(): AppUpdate? = withContext(Dispatchers.IO) {
+    private fun fetchUpdate(apiUrl: String, sourceName: String): AppUpdate? {
         try {
-            val request = Request.Builder()
-                .url(GITHUB_API_URL)
-                .header("Accept", "application/vnd.github+json")
-                .get()
-                .build()
+            val requestBuilder = Request.Builder().url(apiUrl).get()
+            if (apiUrl == GITHUB_API_URL) {
+                requestBuilder.header("Accept", "application/vnd.github+json")
+            }
 
-            val response = client.newCall(request).execute()
+            val response = client.newCall(requestBuilder.build()).execute()
             if (!response.isSuccessful) {
-                Log.e(TAG, "GitHub 获取更新信息失败，响应码: ${response.code}")
-                return@withContext null
+                Log.e(TAG, "$sourceName 获取更新信息失败，响应码: ${response.code}")
+                return null
             }
 
             val responseBody = response.body?.string()
             if (responseBody.isNullOrEmpty()) {
                 Log.e(TAG, "响应内容为空")
-                return@withContext null
+                return null
             }
 
             val json = JSONObject(responseBody)
             val tagName = json.optString("tag_name", "")
-            val body = json.optString("body", "")
             val versionCode = parseVersionCode(tagName)
             val versionName = parseVersionName(tagName)
+            val body = json.optString("body", "")
+            val downloadUrl = findApkDownloadUrl(json.optJSONArray("assets"))
 
-            val assets = json.optJSONArray("assets")
-            var downloadUrl = ""
-            if (assets != null && assets.length() > 0) {
-                for (i in 0 until assets.length()) {
-                    val asset = assets.getJSONObject(i)
-                    val name = asset.optString("name", "")
-                    if (name.endsWith(".apk")) {
-                        downloadUrl = asset.optString("browser_download_url", "")
-                        break
-                    }
-                }
-                if (downloadUrl.isEmpty()) {
-                    downloadUrl = assets.getJSONObject(0)
-                        .optString("browser_download_url", "")
-                }
-            }
-
-            if (versionCode > 0) {
+            return if (versionCode > 0) {
                 AppUpdate(versionName, versionCode, body, downloadUrl)
             } else {
                 Log.e(TAG, "解析 versionCode 失败，tag: $tagName")
                 null
             }
         } catch (e: Exception) {
-            Log.e(TAG, "GitHub 检查更新失败: ${e.message}", e)
-            null
+            Log.e(TAG, "$sourceName 检查更新失败: ${e.message}", e)
+            return null
         }
     }
 
-    private suspend fun checkUpdateFromGitee(): AppUpdate? = withContext(Dispatchers.IO) {
-        try {
-            val request = Request.Builder()
-                .url(GITEE_API_URL)
-                .get()
-                .build()
-
-            val response = client.newCall(request).execute()
-            if (!response.isSuccessful) {
-                Log.e(TAG, "Gitee 获取更新信息失败，响应码: ${response.code}")
-                return@withContext null
+    private fun findApkDownloadUrl(assets: org.json.JSONArray?): String {
+        if (assets == null || assets.length() == 0) return ""
+        for (i in 0 until assets.length()) {
+            val asset = assets.getJSONObject(i)
+            if (asset.optString("name", "").endsWith(".apk")) {
+                return asset.optString("browser_download_url", "")
             }
-
-            val responseBody = response.body?.string()
-            if (responseBody.isNullOrEmpty()) {
-                Log.e(TAG, "响应内容为空")
-                return@withContext null
-            }
-
-            val json = JSONObject(responseBody)
-            val tagName = json.optString("tag_name", "")
-            val body = json.optString("body", "")
-            val versionCode = parseVersionCode(tagName)
-            val versionName = parseVersionName(tagName)
-
-            val assets = json.optJSONArray("assets")
-            var downloadUrl = ""
-            if (assets != null && assets.length() > 0) {
-                for (i in 0 until assets.length()) {
-                    val asset = assets.getJSONObject(i)
-                    val name = asset.optString("name", "")
-                    if (name.endsWith(".apk")) {
-                        downloadUrl = asset.optString("browser_download_url", "")
-                        break
-                    }
-                }
-                if (downloadUrl.isEmpty()) {
-                    downloadUrl = assets.getJSONObject(0)
-                        .optString("browser_download_url", "")
-                }
-            }
-
-            if (versionCode > 0) {
-                AppUpdate(versionName, versionCode, body, downloadUrl)
-            } else {
-                Log.e(TAG, "解析 versionCode 失败，tag: $tagName")
-                null
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Gitee 检查更新失败: ${e.message}", e)
-            null
         }
+        return assets.getJSONObject(0).optString("browser_download_url", "")
     }
 }

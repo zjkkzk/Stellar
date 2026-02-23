@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import roro.stellar.Stellar
 import roro.stellar.manager.R
 import roro.stellar.manager.compat.ClipboardUtils
-import roro.stellar.manager.domain.apps.AppsViewModel
 import roro.stellar.manager.startup.command.Starter
 import roro.stellar.manager.ui.components.LocalScreenConfig
 import roro.stellar.manager.ui.components.StellarDialog
@@ -43,17 +42,14 @@ import roro.stellar.manager.util.UserHandleCompat
 fun HomeScreen(
     topAppBarState: TopAppBarState,
     homeViewModel: HomeViewModel,
-    appsViewModel: AppsViewModel,
     onNavigateToStarter: (isRoot: Boolean, host: String?, port: Int, hasSecureSettings: Boolean) -> Unit = { _, _, _, _ -> }
 ) {
     val scrollBehavior = createTopAppBarScrollBehavior(topAppBarState)
     val context = LocalContext.current
     val serviceStatusResource by homeViewModel.serviceStatus.observeAsState()
-    val grantedCountResource by appsViewModel.grantedCount.observeAsState()
     val screenConfig = LocalScreenConfig.current
 
     val serviceStatus = serviceStatusResource?.data
-    grantedCountResource?.data ?: 0
 
     val isRunning = serviceStatus?.isRunning ?: false
     val isRoot = serviceStatus?.uid == 0
