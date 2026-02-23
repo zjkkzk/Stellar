@@ -124,6 +124,7 @@
     <string name="copy_logs">نسخ السجلات</string>
     <string name="clear_logs">مسح السجلات</string>
     <string name="search_logs">البحث في السجلات…</string>
+    <string name="search_apps">البحث في التطبيقات…</string>
     <string name="clear">مسح</string>
     <string name="no_logs">لا توجد سجلات</string>
     <string name="logs_will_show">ستظهر السجلات عند تشغيل الخدمة</string>
@@ -267,6 +268,8 @@
     <string name="boot_start_root_no_permission">صلاحية Root غير متاحة، فشل التشغيل عند الإقلاع</string>
     <string name="adb_key_error">خطأ في مفتاح ADB</string>
     <string name="adb_connection_failed">فشل اتصال ADB ‏%1$s:%2$d</string>
+
+    <string name="logs_app_not_running">لم يكن التطبيق قيد التشغيل خلال جلسة الخدمة هذه، لا توجد سجلات متاحة.</string>
 
     <!-- Update -->
     <string name="new_version_title">إصدار جديد v%s</string>

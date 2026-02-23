@@ -124,6 +124,7 @@
     <string name="copy_logs">Копировать журнал</string>
     <string name="clear_logs">Очистить журнал</string>
     <string name="search_logs">Поиск в журнале…</string>
+    <string name="search_apps">Поиск приложений…</string>
     <string name="clear">Очистить</string>
     <string name="no_logs">Нет записей</string>
     <string name="logs_will_show">Записи появятся при работающем сервисе</string>
@@ -267,6 +268,8 @@
     <string name="boot_start_root_no_permission">Root-доступ недоступен, автозапуск не удался</string>
     <string name="adb_key_error">Ошибка ключа ADB</string>
     <string name="adb_connection_failed">Ошибка подключения ADB %1$s:%2$d</string>
+
+    <string name="logs_app_not_running">Приложение не запускалось за время этой сессии сервиса, журналы недоступны.</string>
 
     <!-- Update -->
     <string name="new_version_title">Новая версия v%s</string>

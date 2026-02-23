@@ -124,6 +124,7 @@
     <string name="copy_logs">Copier les journaux</string>
     <string name="clear_logs">Effacer les journaux</string>
     <string name="search_logs">Rechercher dans les journaux…</string>
+    <string name="search_apps">Rechercher des applications…</string>
     <string name="clear">Effacer</string>
     <string name="no_logs">Aucun journal</string>
     <string name="logs_will_show">Les journaux apparaîtront lorsque le service sera en cours d\'exécution</string>
@@ -267,6 +268,8 @@
     <string name="boot_start_root_no_permission">Accès Root indisponible, échec du démarrage au boot</string>
     <string name="adb_key_error">Erreur de clé ADB</string>
     <string name="adb_connection_failed">Échec de la connexion ADB %1$s:%2$d</string>
+
+    <string name="logs_app_not_running">L\'application n\'était pas en cours d\'exécution pendant cette session de service, aucun journal disponible.</string>
 
     <!-- Update -->
     <string name="new_version_title">Nouvelle version v%s</string>

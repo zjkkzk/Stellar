@@ -43,6 +43,7 @@ fun StandardLargeTopAppBar(
     titleModifier: Modifier = Modifier,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable () -> Unit = {},
+    titleContent: @Composable (() -> Unit)? = null,
     scrollBehavior: TopAppBarScrollBehavior
 ) {
     val configuration = LocalConfiguration.current
@@ -59,11 +60,15 @@ fun StandardLargeTopAppBar(
 
     LargeTopAppBar(
         title = {
-            Text(
-                text = title,
-                fontWeight = FontWeight.Bold,
-                modifier = titleModifier
-            )
+            if (titleContent != null) {
+                titleContent()
+            } else {
+                Text(
+                    text = title,
+                    fontWeight = FontWeight.Bold,
+                    modifier = titleModifier
+                )
+            }
         },
         navigationIcon = navigationIcon,
         actions = { actions() },

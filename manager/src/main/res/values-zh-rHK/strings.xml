@@ -124,6 +124,7 @@
     <string name="copy_logs">複製日誌</string>
     <string name="clear_logs">清除日誌</string>
     <string name="search_logs">搜索日誌...</string>
+    <string name="search_apps">搜索應用...</string>
     <string name="clear">清除</string>
     <string name="no_logs">暫無日誌</string>
     <string name="logs_will_show">日誌將在服務運行時顯示</string>
@@ -267,6 +268,8 @@
     <string name="boot_start_root_no_permission">Root 權限不可用，開機啟動失敗</string>
     <string name="adb_key_error">ADB 密鑰錯誤</string>
     <string name="adb_connection_failed">ADB 連接失敗 %1$s:%2$d</string>
+
+    <string name="logs_app_not_running">該應用在本次服務啟動期間未運行，無可用日誌。</string>
 
     <!-- Update -->
     <string name="new_version_title">發現新版本 v%s</string>

@@ -124,6 +124,7 @@
     <string name="copy_logs">Copiar registros</string>
     <string name="clear_logs">Borrar registros</string>
     <string name="search_logs">Buscar en registros…</string>
+    <string name="search_apps">Buscar aplicaciones…</string>
     <string name="clear">Borrar</string>
     <string name="no_logs">Sin registros</string>
     <string name="logs_will_show">Los registros aparecerán cuando el servicio esté en ejecución</string>
@@ -267,6 +268,8 @@
     <string name="boot_start_root_no_permission">Acceso Root no disponible, error en el inicio al arrancar</string>
     <string name="adb_key_error">Error de clave ADB</string>
     <string name="adb_connection_failed">Error de conexión ADB %1$s:%2$d</string>
+
+    <string name="logs_app_not_running">La aplicación no se ejecutó durante esta sesión del servicio, no hay registros disponibles.</string>
 
     <!-- Update -->
     <string name="new_version_title">Nueva versión v%s</string>

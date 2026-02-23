@@ -1,12 +1,13 @@
 package roro.stellar.manager.ui.features.apps
 
-import android.content.pm.PackageInfo
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -26,13 +27,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -48,6 +53,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.asImageBitmap
@@ -81,6 +89,7 @@ import roro.stellar.manager.ui.theme.AppShape
 import roro.stellar.manager.ui.theme.AppSpacing
 import roro.stellar.manager.util.Logger.Companion.LOGGER
 import roro.stellar.manager.util.StellarSystemApis
+import roro.stellar.manager.util.PinyinUtils
 import roro.stellar.manager.util.UserHandleCompat
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -97,6 +106,13 @@ fun AppsScreen(
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
     val screenConfig = LocalScreenConfig.current
     val gridColumns = screenConfig.gridColumns
+    val context = LocalContext.current
+    val pm = context.packageManager
+
+    var isSearching by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
+    val focusRequester = remember { FocusRequester() }
+    val searchScope = rememberCoroutineScope()
 
     LaunchedEffect(lifecycleOwner) {
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -106,15 +122,84 @@ fun AppsScreen(
         }
     }
 
+    LaunchedEffect(isSearching) {
+        if (isSearching) focusRequester.requestFocus()
+    }
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            StandardLargeTopAppBar(
-                title = stringResource(R.string.authorized_apps),
-                scrollBehavior = scrollBehavior
-            )
+            if (isSearching) {
+                androidx.compose.material3.TopAppBar(
+                    title = {
+                        BasicTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            singleLine = true,
+                            textStyle = MaterialTheme.typography.bodyLarge.copy(
+                                color = MaterialTheme.colorScheme.onSurface
+                            ),
+                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .focusRequester(focusRequester),
+                            decorationBox = { innerTextField ->
+                                Box {
+                                    if (searchQuery.isEmpty()) {
+                                        Text(
+                                            text = stringResource(R.string.search_apps),
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                    innerTextField()
+                                }
+                            }
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            isSearching = false
+                            searchQuery = ""
+                        }) {
+                            Icon(Icons.Default.Close, contentDescription = null)
+                        }
+                    }
+                )
+            } else {
+                StandardLargeTopAppBar(
+                    title = stringResource(R.string.authorized_apps),
+                    scrollBehavior = scrollBehavior,
+                    titleContent = {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(R.string.authorized_apps),
+                                fontWeight = FontWeight.Bold
+                            )
+                            IconButton(onClick = {
+                                searchScope.launch {
+                                    val target = topAppBarState.heightOffsetLimit
+                                    animate(
+                                        initialValue = topAppBarState.heightOffset,
+                                        targetValue = target
+                                    ) { value, _ ->
+                                        topAppBarState.heightOffset = value
+                                    }
+                                    isSearching = true
+                                }
+                            }) {
+                                Icon(Icons.Default.Search, contentDescription = null)
+                            }
+                        }
+                    }
+                )
+            }
         }
     ) { paddingValues ->
         if (!isServiceRunning) {
@@ -200,10 +285,20 @@ fun AppsScreen(
             }
 
             Status.SUCCESS -> {
-                val stellarApps = stellarAppsResource?.data ?: emptyList()
-                val shizukuApps = shizukuAppsResource?.data ?: emptyList()
+                val allStellar = stellarAppsResource?.data ?: emptyList()
+                val allShizuku = shizukuAppsResource?.data ?: emptyList()
 
-                if (stellarApps.isEmpty() && shizukuApps.isEmpty()) {
+                fun matchesQuery(appInfo: AppInfo): Boolean {
+                    if (searchQuery.isEmpty()) return true
+                    val appName = appInfo.packageInfo.applicationInfo?.loadLabel(pm)?.toString() ?: ""
+                    val pkgName = appInfo.packageInfo.packageName
+                    return PinyinUtils.matches(appName, searchQuery) || pkgName.contains(searchQuery, ignoreCase = true)
+                }
+
+                val stellarApps = remember(allStellar, searchQuery) { allStellar.filter { matchesQuery(it) } }
+                val shizukuApps = remember(allShizuku, searchQuery) { allShizuku.filter { matchesQuery(it) } }
+
+                if (allStellar.isEmpty() && allShizuku.isEmpty()) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -401,6 +496,7 @@ fun AppListItem(
     val scope = rememberCoroutineScope()
     var expanded by remember { mutableStateOf(false) }
 
+    @SuppressLint("LocalContextGetResourceValueCall")
     fun onLongPress() {
         scope.launch {
             val logs = withContext(Dispatchers.IO) {
