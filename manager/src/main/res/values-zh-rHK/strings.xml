@@ -81,11 +81,16 @@
     <!-- Settings Screen -->
     <string name="theme">主題</string>
     <string name="theme_subtitle">選擇應用的外觀主題</string>
-    <string name="boot_start_wireless">開機啟動（無線調試）</string>
-    <string name="boot_start_wireless_subtitle">Stellar 可以透過無線調試開機啟動</string>
-    <string name="boot_start_root">開機啟動（Root）</string>
-    <string name="boot_start_root_subtitle">Stellar 可以透過 Root 權限開機啟動</string>
-    <string name="auto_enable_accessibility">將自動開啟無障礙服務以實現開機自啟</string>
+    <string name="boot_startup_options">開機啟動</string>
+    <string name="boot_startup_options_subtitle">設定開機自啟動模式</string>
+    <string name="boot_start_wireless">無線調試</string>
+    <string name="boot_start_wireless_subtitle">透過無線調試開機啟動</string>
+    <string name="boot_start_root">Root</string>
+    <string name="boot_start_root_subtitle">透過 Root 權限開機啟動</string>
+    <string name="accessibility_auto_start">無障礙</string>
+    <string name="accessibility_auto_start_subtitle">透過無障礙權限開機啟動</string>
+    <string name="accessibility_auto_start_subtitle_disabled">僅在服務運行時可調整</string>
+    <string name="accessibility_toggle_failed">操作無障礙服務失敗，服務可能未運行</string>
     <string name="shizuku_compat_layer">Shizuku 兼容層</string>
     <string name="shizuku_compat_layer_subtitle">允許 Shizuku 應用透過 Stellar 服務運行</string>
     <string name="shizuku_compat_enabled">Shizuku 兼容層已啟用</string>

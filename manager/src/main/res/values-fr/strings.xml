@@ -81,11 +81,16 @@
     <!-- Settings Screen -->
     <string name="theme">Thème</string>
     <string name="theme_subtitle">Choisir l\'apparence de l\'application</string>
-    <string name="boot_start_wireless">Démarrage au boot (Débogage sans fil)</string>
-    <string name="boot_start_wireless_subtitle">Démarrer Stellar via le débogage sans fil au démarrage</string>
-    <string name="boot_start_root">Démarrage au boot (Root)</string>
-    <string name="boot_start_root_subtitle">Démarrer Stellar via Root au démarrage</string>
-    <string name="auto_enable_accessibility">Le service d\'accessibilité sera activé automatiquement pour le démarrage au boot</string>
+    <string name="boot_startup_options">Démarrage au boot</string>
+    <string name="boot_startup_options_subtitle">Configurer le mode de démarrage automatique au boot</string>
+    <string name="boot_start_wireless">Débogage sans fil</string>
+    <string name="boot_start_wireless_subtitle">Démarrer via le débogage sans fil au boot</string>
+    <string name="boot_start_root">Root</string>
+    <string name="boot_start_root_subtitle">Démarrer via Root au boot</string>
+    <string name="accessibility_auto_start">Accessibilité</string>
+    <string name="accessibility_auto_start_subtitle">Démarrer au boot via le service d\'accessibilité</string>
+    <string name="accessibility_auto_start_subtitle_disabled">Modifiable uniquement lorsque le service est en cours d\'exécution</string>
+    <string name="accessibility_toggle_failed">Échec de la modification du service d\'accessibilité, le service n\'est peut-être pas en cours d\'exécution</string>
     <string name="shizuku_compat_layer">Compatibilité Shizuku</string>
     <string name="shizuku_compat_layer_subtitle">Autoriser les applications Shizuku à fonctionner via Stellar</string>
     <string name="shizuku_compat_enabled">Compatibilité Shizuku activée</string>

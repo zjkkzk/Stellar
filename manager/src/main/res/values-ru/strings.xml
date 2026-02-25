@@ -81,11 +81,16 @@
     <!-- Settings Screen -->
     <string name="theme">Тема</string>
     <string name="theme_subtitle">Выбрать оформление приложения</string>
-    <string name="boot_start_wireless">Автозапуск (Беспроводная отладка)</string>
-    <string name="boot_start_wireless_subtitle">Запускать Stellar через беспроводную отладку при загрузке</string>
-    <string name="boot_start_root">Автозапуск (Root)</string>
-    <string name="boot_start_root_subtitle">Запускать Stellar через Root при загрузке</string>
-    <string name="auto_enable_accessibility">Служба специальных возможностей будет включена автоматически для автозапуска</string>
+    <string name="boot_startup_options">Автозапуск при загрузке</string>
+    <string name="boot_startup_options_subtitle">Настройка режима автозапуска при загрузке</string>
+    <string name="boot_start_wireless">Беспроводная отладка</string>
+    <string name="boot_start_wireless_subtitle">Запуск через беспроводную отладку при загрузке</string>
+    <string name="boot_start_root">Root</string>
+    <string name="boot_start_root_subtitle">Запуск через Root при загрузке</string>
+    <string name="accessibility_auto_start">Спец. возможности</string>
+    <string name="accessibility_auto_start_subtitle">Запуск при загрузке через службу спец. возможностей</string>
+    <string name="accessibility_auto_start_subtitle_disabled">Доступно только при запущенном сервисе</string>
+    <string name="accessibility_toggle_failed">Не удалось изменить службу специальных возможностей, сервис может быть не запущен</string>
     <string name="shizuku_compat_layer">Совместимость с Shizuku</string>
     <string name="shizuku_compat_layer_subtitle">Разрешить приложениям Shizuku работать через Stellar</string>
     <string name="shizuku_compat_enabled">Совместимость с Shizuku включена</string>

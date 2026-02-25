@@ -294,6 +294,15 @@ class ConfigManager {
         }
     }
 
+    fun isAccessibilityAutoStartEnabled(): Boolean {
+        return try {
+            val freshConfig = loadFromManager()
+            freshConfig.accessibilityAutoStart
+        } catch (_: Throwable) {
+            false
+        }
+    }
+
     companion object {
         private val LOGGER: Logger = Logger("ConfigManager")
 

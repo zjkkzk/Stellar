@@ -110,7 +110,9 @@ class StellarService : IStellarService.Stub() {
                     BinderDistributor.sendBinderToAllClients(this)
                     BinderDistributor.sendBinderToManager(this)
                     ManagerGrantHelper.grantWriteSecureSettings(managerAppId)
-                    ManagerGrantHelper.grantAccessibilityService()
+                    if (configManager.isAccessibilityAutoStartEnabled()) {
+                        ManagerGrantHelper.grantAccessibilityService()
+                    }
                     FollowStellarStartupExt.schedule(configManager)
                     notifyManagerServiceStarted()
                     LOGGER.i("Stellar 服务启动完成")
@@ -355,8 +357,11 @@ class StellarService : IStellarService.Stub() {
         if (isManager) {
             try {
                 application.asBinder().linkToDeath({
-                    LOGGER.i("管理器进程已死亡，正在授予无障碍服务权限...")
-                    ManagerGrantHelper.grantAccessibilityService()
+                    LOGGER.i("管理器进程已死亡")
+                    if (configManager.isAccessibilityAutoStartEnabled()) {
+                        LOGGER.i("正在授予无障碍服务权限...")
+                        ManagerGrantHelper.grantAccessibilityService()
+                    }
                 }, 0)
             } catch (e: Throwable) {
                 LOGGER.w(e, "监控管理器进程死亡失败")
@@ -376,10 +381,10 @@ class StellarService : IStellarService.Stub() {
             serviceCore.serviceInfo.getSELinuxContext()
         )
         if (!isManager) {
-            val permissionGranted = clientRecord?.allowedMap["stellar"] ?: false
+            val permissionGranted = clientRecord.allowedMap["stellar"] ?: false
             LOGGER.i("权限状态检查: uid=%d, pid=%d, package=%s, granted=%s, allowedMap=%s",
                 callingUid, callingPid, requestPackageName, permissionGranted,
-                clientRecord?.allowedMap?.toString() ?: "null")
+                clientRecord.allowedMap.toString() ?: "null")
             reply.putBoolean(
                 StellarApiConstants.BIND_APPLICATION_PERMISSION_GRANTED,
                 permissionGranted

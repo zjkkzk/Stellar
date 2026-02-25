@@ -81,11 +81,16 @@
     <!-- Settings Screen -->
     <string name="theme">المظهر</string>
     <string name="theme_subtitle">اختيار مظهر التطبيق</string>
-    <string name="boot_start_wireless">تشغيل عند الإقلاع (التصحيح اللاسلكي)</string>
-    <string name="boot_start_wireless_subtitle">تشغيل Stellar عبر التصحيح اللاسلكي عند الإقلاع</string>
-    <string name="boot_start_root">تشغيل عند الإقلاع (Root)</string>
-    <string name="boot_start_root_subtitle">تشغيل Stellar عبر Root عند الإقلاع</string>
-    <string name="auto_enable_accessibility">سيتم تفعيل خدمة إمكانية الوصول تلقائياً للتشغيل عند الإقلاع</string>
+    <string name="boot_startup_options">التشغيل عند الإقلاع</string>
+    <string name="boot_startup_options_subtitle">تكوين وضع التشغيل التلقائي عند الإقلاع</string>
+    <string name="boot_start_wireless">التصحيح اللاسلكي</string>
+    <string name="boot_start_wireless_subtitle">التشغيل عبر التصحيح اللاسلكي عند الإقلاع</string>
+    <string name="boot_start_root">Root</string>
+    <string name="boot_start_root_subtitle">التشغيل عبر Root عند الإقلاع</string>
+    <string name="accessibility_auto_start">إمكانية الوصول</string>
+    <string name="accessibility_auto_start_subtitle">التشغيل عند الإقلاع عبر خدمة إمكانية الوصول</string>
+    <string name="accessibility_auto_start_subtitle_disabled">يمكن التعديل فقط عند تشغيل الخدمة</string>
+    <string name="accessibility_toggle_failed">فشل في تعديل خدمة إمكانية الوصول، قد لا تكون الخدمة قيد التشغيل</string>
     <string name="shizuku_compat_layer">توافق Shizuku</string>
     <string name="shizuku_compat_layer_subtitle">السماح لتطبيقات Shizuku بالعمل عبر Stellar</string>
     <string name="shizuku_compat_enabled">تم تفعيل توافق Shizuku</string>

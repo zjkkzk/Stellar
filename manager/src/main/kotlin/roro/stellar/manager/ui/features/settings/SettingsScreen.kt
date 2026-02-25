@@ -36,14 +36,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.SettingsEthernet
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.automirrored.filled.Subject
 import androidx.compose.material.icons.filled.SystemUpdate
-import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -84,7 +83,9 @@ import roro.stellar.manager.R
 import roro.stellar.manager.StellarSettings
 import roro.stellar.manager.StellarSettings.KEEP_START_ON_BOOT
 import roro.stellar.manager.StellarSettings.KEEP_START_ON_BOOT_WIRELESS
+import roro.stellar.manager.StellarManagerProvider.Companion.KEY_SHIZUKU_COMPAT
 import roro.stellar.manager.StellarSettings.SHIZUKU_COMPAT_ENABLED
+import roro.stellar.manager.StellarSettings.ACCESSIBILITY_AUTO_START
 import roro.stellar.manager.StellarSettings.TCPIP_PORT
 import roro.stellar.manager.StellarSettings.TCPIP_PORT_ENABLED
 import roro.stellar.manager.StellarSettings.DROP_PRIVILEGES
@@ -97,6 +98,10 @@ import roro.stellar.manager.ui.components.StellarSegmentedSelector
 import roro.stellar.manager.ui.components.SettingsContentCard
 import roro.stellar.manager.ui.components.SettingsSwitchCard
 import roro.stellar.manager.ui.components.SettingsClickableCard
+import roro.stellar.manager.ui.components.SettingsExpandableCard
+import roro.stellar.manager.ui.components.SettingsInnerSwitchRow
+import roro.stellar.manager.db.AppDatabase
+import roro.stellar.manager.db.ConfigEntity
 import roro.stellar.manager.util.update.AppUpdate
 import roro.stellar.manager.util.update.ApkDownloader
 import roro.stellar.manager.util.update.DownloadState
@@ -115,6 +120,8 @@ import com.topjohnwu.superuser.Shell
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import roro.stellar.Stellar
+import java.io.BufferedReader
+import java.io.InputStreamReader
 
 private const val TAG = "SettingsScreen"
 
@@ -147,8 +154,10 @@ fun SettingsScreen(
 
     val scope = rememberCoroutineScope()
     var currentSource by remember { mutableStateOf<UpdateSource?>(null) }
+    var isServiceRunning by remember { mutableStateOf(Stellar.pingBinder()) }
 
     LaunchedEffect(Unit) {
+        isServiceRunning = withContext(Dispatchers.IO) { Stellar.pingBinder() }
         val isRoot = withContext(Dispatchers.IO) {
             try {
                 Shell.getShell().isRoot
@@ -176,7 +185,13 @@ fun SettingsScreen(
         mutableStateOf(preferences.getBoolean(DROP_PRIVILEGES, false))
     }
 
+    var accessibilityAutoStart by remember {
+        mutableStateOf(preferences.getBoolean(ACCESSIBILITY_AUTO_START, false))
+    }
+
     var currentThemeMode by remember { mutableStateOf(ThemePreferences.themeMode.value) }
+
+    var bootOptionsExpanded by remember { mutableStateOf(false) }
 
     var isCheckingUpdate by remember { mutableStateOf(false) }
     var pendingUpdate by remember { mutableStateOf<AppUpdate?>(null) }
@@ -256,51 +271,88 @@ fun SettingsScreen(
                 }
             }
 
-            item {
-                SettingsSwitchCard(
-                    icon = Icons.Default.Wifi,
-                    title = stringResource(R.string.boot_start_wireless),
-                    subtitle = stringResource(R.string.boot_start_wireless_subtitle),
-                    checked = startOnBootWireless,
-                    onCheckedChange = { newValue ->
-                        if (newValue) {
-                            Toast.makeText(context, context.getString(R.string.auto_enable_accessibility), Toast.LENGTH_SHORT).show()
-                            startOnBoot = false
-                            savePreference(KEEP_START_ON_BOOT, false)
+            item(span = { GridItemSpan(gridColumns) }) {
+                SettingsExpandableCard(
+                    icon = Icons.Default.FlashOn,
+                    title = stringResource(R.string.boot_startup_options),
+                    subtitle = stringResource(R.string.boot_startup_options_subtitle),
+                    expanded = bootOptionsExpanded,
+                    onExpandChange = { bootOptionsExpanded = it }
+                ) {
+                    SettingsInnerSwitchRow(
+                        title = stringResource(R.string.boot_start_wireless),
+                        subtitle = stringResource(R.string.boot_start_wireless_subtitle),
+                        checked = startOnBootWireless,
+                        onCheckedChange = { newValue ->
+                            if (newValue) {
+                                startOnBoot = false
+                                savePreference(KEEP_START_ON_BOOT, false)
+                            }
+                            startOnBootWireless = newValue
+                            toggleBootComponent(
+                                context,
+                                componentName,
+                                KEEP_START_ON_BOOT_WIRELESS,
+                                newValue || startOnBoot
+                            )
                         }
-                        startOnBootWireless = newValue
-                        toggleBootComponent(
-                            context,
-                            componentName,
-                            KEEP_START_ON_BOOT_WIRELESS,
-                            newValue || startOnBoot
-                        )
-                    }
-                )
-            }
+                    )
 
-            item {
-                SettingsSwitchCard(
-                    icon = Icons.Default.PowerSettingsNew,
-                    title = stringResource(R.string.boot_start_root),
-                    subtitle = stringResource(R.string.boot_start_root_subtitle),
-                    checked = startOnBoot,
-                    enabled = hasRootPermission == true,
-                    onCheckedChange = { newValue ->
-                        if (newValue) {
-                            Toast.makeText(context, context.getString(R.string.auto_enable_accessibility), Toast.LENGTH_SHORT).show()
-                            startOnBootWireless = false
-                            savePreference(KEEP_START_ON_BOOT_WIRELESS, false)
+                    SettingsInnerSwitchRow(
+                        title = stringResource(R.string.boot_start_root),
+                        subtitle = stringResource(R.string.boot_start_root_subtitle),
+                        checked = startOnBoot,
+                        enabled = hasRootPermission == true,
+                        onCheckedChange = { newValue ->
+                            if (newValue) {
+                                startOnBootWireless = false
+                                savePreference(KEEP_START_ON_BOOT_WIRELESS, false)
+                            }
+                            startOnBoot = newValue
+                            toggleBootComponent(
+                                context,
+                                componentName,
+                                KEEP_START_ON_BOOT,
+                                newValue || startOnBootWireless
+                            )
                         }
-                        startOnBoot = newValue
-                        toggleBootComponent(
-                            context,
-                            componentName,
-                            KEEP_START_ON_BOOT,
-                            newValue || startOnBootWireless
-                        )
-                    }
-                )
+                    )
+
+                    SettingsInnerSwitchRow(
+                        title = stringResource(R.string.accessibility_auto_start),
+                        subtitle = if (isServiceRunning) {
+                            stringResource(R.string.accessibility_auto_start_subtitle)
+                        } else {
+                            stringResource(R.string.accessibility_auto_start_subtitle_disabled)
+                        },
+                        checked = accessibilityAutoStart,
+                        enabled = isServiceRunning,
+                        onCheckedChange = { newValue ->
+                            accessibilityAutoStart = newValue
+                            savePreference(ACCESSIBILITY_AUTO_START, newValue)
+                            scope.launch(Dispatchers.IO) {
+                                try {
+                                    val db = AppDatabase.get(context)
+                                    db.configDao().set(ConfigEntity("accessibilityAutoStart", newValue.toString()))
+                                } catch (_: Exception) {}
+                                try {
+                                    toggleAccessibilityServiceViaAdb(newValue)
+                                } catch (e: Exception) {
+                                    Log.e(TAG, "操作无障碍服务失败", e)
+                                    accessibilityAutoStart = !newValue
+                                    savePreference(ACCESSIBILITY_AUTO_START, !newValue)
+                                    try {
+                                        val db = AppDatabase.get(context)
+                                        db.configDao().set(ConfigEntity("accessibilityAutoStart", (!newValue).toString()))
+                                    } catch (_: Exception) {}
+                                    withContext(Dispatchers.Main) {
+                                        Toast.makeText(context, context.getString(R.string.accessibility_toggle_failed), Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
+                        }
+                    )
+                }
             }
 
             item {
@@ -310,14 +362,20 @@ fun SettingsScreen(
                     subtitle = stringResource(R.string.shizuku_compat_layer_subtitle),
                     checked = shizukuCompatEnabled,
                     onCheckedChange = { newValue ->
+                        shizukuCompatEnabled = newValue
+                        savePreference(SHIZUKU_COMPAT_ENABLED, newValue)
                         scope.launch {
+                            try {
+                                val db = AppDatabase.get(context)
+                                withContext(Dispatchers.IO) {
+                                    db.configDao().set(ConfigEntity(KEY_SHIZUKU_COMPAT, newValue.toString()))
+                                }
+                            } catch (_: Exception) {}
                             try {
                                 @SuppressLint("RestrictedApi")
                                 withContext(Dispatchers.IO) {
                                     Stellar.setShizukuCompatEnabled(newValue)
                                 }
-                                shizukuCompatEnabled = newValue
-                                savePreference(SHIZUKU_COMPAT_ENABLED, newValue)
                             } catch (_: Exception) {
                             }
                         }
@@ -739,6 +797,44 @@ private fun toggleBootComponent(
     }
 
     return true
+}
+
+private fun executeAdbCommand(command: String): String {
+    val process = Stellar.newProcess(arrayOf("sh", "-c", command), null, null)
+    val reader = BufferedReader(InputStreamReader(process.inputStream))
+    val output = reader.readText().trim()
+    process.waitFor()
+    return output
+}
+
+private fun toggleAccessibilityServiceViaAdb(enable: Boolean) {
+    val serviceName = "roro.stellar.manager/.service.StellarAccessibilityService"
+
+    val currentServices = executeAdbCommand("settings get secure enabled_accessibility_services")
+
+    if (enable) {
+        if (currentServices.contains(serviceName)) return
+
+        val newServices = if (currentServices.isEmpty() || currentServices == "null") {
+            serviceName
+        } else {
+            "$currentServices:$serviceName"
+        }
+        executeAdbCommand("settings put secure enabled_accessibility_services '$newServices'")
+        executeAdbCommand("settings put secure accessibility_enabled 1")
+    } else {
+        val newServices = currentServices
+            .split(":")
+            .filter { it != serviceName }
+            .joinToString(":")
+
+        if (newServices.isEmpty()) {
+            executeAdbCommand("settings put secure enabled_accessibility_services null")
+            executeAdbCommand("settings put secure accessibility_enabled 0")
+        } else {
+            executeAdbCommand("settings put secure enabled_accessibility_services '$newServices'")
+        }
+    }
 }
 
 @OptIn(ExperimentalFoundationApi::class)

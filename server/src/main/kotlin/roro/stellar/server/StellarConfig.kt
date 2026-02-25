@@ -10,6 +10,8 @@ class StellarConfig {
     var packages: MutableMap<Int, PackageEntry> = mutableMapOf()
     @SerializedName("shizukuCompatEnabled")
     var shizukuCompatEnabled: Boolean = true
+    @SerializedName("accessibilityAutoStart")
+    var accessibilityAutoStart: Boolean = false
 
     class PackageEntry {
         @SerializedName("packages")

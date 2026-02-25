@@ -83,11 +83,16 @@
     <!-- Settings Screen -->
     <string name="theme">Theme</string>
     <string name="theme_subtitle">Choose the app appearance</string>
-    <string name="boot_start_wireless">Boot Start (Wireless Debugging)</string>
-    <string name="boot_start_wireless_subtitle">Start Stellar via wireless debugging on boot</string>
-    <string name="boot_start_root">Boot Start (Root)</string>
-    <string name="boot_start_root_subtitle">Start Stellar via root on boot</string>
-    <string name="auto_enable_accessibility">Accessibility service will be enabled automatically for boot start</string>
+    <string name="boot_startup_options">Boot Startup</string>
+    <string name="boot_startup_options_subtitle">Configure auto-start mode on boot</string>
+    <string name="boot_start_wireless">Wireless Debugging</string>
+    <string name="boot_start_wireless_subtitle">Start via wireless debugging on boot</string>
+    <string name="boot_start_root">Root</string>
+    <string name="boot_start_root_subtitle">Start via root on boot</string>
+    <string name="accessibility_auto_start">Accessibility</string>
+    <string name="accessibility_auto_start_subtitle">Start on boot via accessibility service</string>
+    <string name="accessibility_auto_start_subtitle_disabled">Only adjustable when service is running</string>
+    <string name="accessibility_toggle_failed">Failed to toggle accessibility service, service may not be running</string>
     <string name="shizuku_compat_layer">Shizuku Compatibility</string>
     <string name="shizuku_compat_layer_subtitle">Allow Shizuku apps to run through Stellar</string>
     <string name="shizuku_compat_enabled">Shizuku compatibility enabled</string>
