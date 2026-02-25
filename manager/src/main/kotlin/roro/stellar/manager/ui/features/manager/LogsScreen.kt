@@ -21,7 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -61,8 +61,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.compose.runtime.snapshotFlow
 import roro.stellar.manager.R
 import roro.stellar.manager.db.AppDatabase
 import roro.stellar.Stellar
@@ -82,6 +84,9 @@ internal fun LogsScreen(
     val db = remember { AppDatabase.get(context) }
     var logs by remember { mutableStateOf(emptyList<String>()) }
     var isLoading by remember { mutableStateOf(false) }
+    var isLoadingMore by remember { mutableStateOf(false) }
+    var hasMore by remember { mutableStateOf(true) }
+    val pageSize = 200
     val listState = rememberLazyListState()
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
@@ -110,24 +115,64 @@ internal fun LogsScreen(
         }
     }
 
+    var allServiceLogs by remember { mutableStateOf<List<String>?>(null) }
+
     val loadLogs: () -> Unit = {
         scope.launch {
             isLoading = true
+            hasMore = true
+            allServiceLogs = null
             try {
-                val result = withContext(Dispatchers.IO) {
+                val (page, cached) = withContext(Dispatchers.IO) {
                     if (Stellar.pingBinder()) {
-                        try { Stellar.getLogs() } catch (_: Throwable) { db.logDao().getAll() }
+                        try {
+                            val all = Stellar.getLogs()
+                            all.take(pageSize) to all
+                        } catch (_: Throwable) {
+                            db.logDao().getPage(pageSize, 0) to null
+                        }
                     } else {
-                        db.logDao().getAll()
+                        db.logDao().getPage(pageSize, 0) to null
                     }
                 }
-                logs = result
+                allServiceLogs = cached
+                logs = page
+                hasMore = page.size >= pageSize
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     Toast.makeText(context, context.getString(R.string.load_logs_failed, e.message ?: ""), Toast.LENGTH_SHORT).show()
                 }
             } finally {
                 isLoading = false
+            }
+        }
+    }
+
+    val loadMore: () -> Unit = {
+        if (!isLoadingMore && hasMore) {
+            scope.launch {
+                isLoadingMore = true
+                try {
+                    val offset = logs.size
+                    val more = withContext(Dispatchers.IO) {
+                        val cached = allServiceLogs
+                        if (cached != null) {
+                            cached.drop(offset).take(pageSize)
+                        } else {
+                            db.logDao().getPage(pageSize, offset)
+                        }
+                    }
+                    if (more.isEmpty()) {
+                        hasMore = false
+                    } else {
+                        logs = logs + more
+                        hasMore = more.size >= pageSize
+                    }
+                } catch (_: Exception) {
+                    hasMore = false
+                } finally {
+                    isLoadingMore = false
+                }
             }
         }
     }
@@ -140,6 +185,7 @@ internal fun LogsScreen(
                     db.logDao().deleteAll()
                 }
                 logs = emptyList()
+                allServiceLogs = null
                 Toast.makeText(context, context.getString(R.string.logs_cleared), Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 Toast.makeText(context, context.getString(R.string.clear_logs_failed, e.message ?: ""), Toast.LENGTH_SHORT).show()
@@ -160,6 +206,18 @@ internal fun LogsScreen(
 
     LaunchedEffect(Unit) {
         loadLogs()
+    }
+
+    LaunchedEffect(listState, hasMore) {
+        snapshotFlow {
+            val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+            val total = listState.layoutInfo.totalItemsCount
+            lastVisible to total
+        }.distinctUntilChanged().collect { (lastVisible, total) ->
+            if (total > 0 && lastVisible >= total - 5 && hasMore && !isLoadingMore) {
+                loadMore()
+            }
+        }
     }
 
     Scaffold(
@@ -201,7 +259,10 @@ internal fun LogsScreen(
                         isLoading -> LoadingView()
                         filteredLogs.isEmpty() -> EmptyLogsView()
                         else -> LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
-                            items(filteredLogs, key = { it }) { log -> LogItem(log = log) }
+                            itemsIndexed(filteredLogs) { _, log -> LogItem(log = log) }
+                            if (isLoadingMore) {
+                                item { LoadingMoreView() }
+                            }
                         }
                     }
                 }
@@ -215,6 +276,7 @@ internal fun LogsScreen(
                 onLevelToggle = onLevelToggle,
                 filteredLogs = filteredLogs,
                 isLoading = isLoading,
+                isLoadingMore = isLoadingMore,
                 listState = listState
             )
         }
@@ -303,6 +365,7 @@ private fun LogsContent(
     onLevelToggle: (String) -> Unit,
     filteredLogs: List<String>,
     isLoading: Boolean,
+    isLoadingMore: Boolean,
     listState: androidx.compose.foundation.lazy.LazyListState
 ) {
     Column(
@@ -318,7 +381,10 @@ private fun LogsContent(
             isLoading -> LoadingView()
             filteredLogs.isEmpty() -> EmptyLogsView()
             else -> LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
-                items(filteredLogs, key = { it }) { log -> LogItem(log = log) }
+                itemsIndexed(filteredLogs) { _, log -> LogItem(log = log) }
+                if (isLoadingMore) {
+                    item { LoadingMoreView() }
+                }
             }
         }
     }
@@ -385,6 +451,18 @@ private fun LoadingView() {
         contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator()
+    }
+}
+
+@Composable
+private fun LoadingMoreView() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
     }
 }
 

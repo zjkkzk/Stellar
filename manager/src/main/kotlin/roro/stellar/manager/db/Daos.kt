@@ -19,6 +19,9 @@ interface LogDao {
     @Query("SELECT line FROM logs ORDER BY id DESC")
     fun getAll(): List<String>
 
+    @Query("SELECT line FROM logs ORDER BY id DESC LIMIT :limit OFFSET :offset")
+    fun getPage(limit: Int, offset: Int): List<String>
+
     @Insert
     fun insert(entity: LogEntity)
 
