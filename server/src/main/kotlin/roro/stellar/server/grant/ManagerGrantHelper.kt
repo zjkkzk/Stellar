@@ -16,18 +16,20 @@ object ManagerGrantHelper {
                 managerAppId
             )
             if (pm == PackageManager.PERMISSION_GRANTED) {
-                LOGGER.i("管理器已拥有 WRITE_SECURE_SETTINGS 权限")
+                LOGGER.i("Manager already has WRITE_SECURE_SETTINGS")
                 return
             }
 
-            LOGGER.i("正在授予管理器 WRITE_SECURE_SETTINGS 权限...")
-            Runtime.getRuntime().exec(arrayOf(
-                "pm", "grant", MANAGER_APPLICATION_ID,
-                Manifest.permission.WRITE_SECURE_SETTINGS
-            )).waitFor()
-            LOGGER.i("WRITE_SECURE_SETTINGS 权限授予完成")
+            LOGGER.i("Granting WRITE_SECURE_SETTINGS to manager...")
+            Runtime.getRuntime().exec(
+                arrayOf(
+                    "pm", "grant", MANAGER_APPLICATION_ID,
+                    Manifest.permission.WRITE_SECURE_SETTINGS
+                )
+            ).waitFor()
+            LOGGER.i("WRITE_SECURE_SETTINGS grant completed")
         } catch (e: Throwable) {
-            LOGGER.e(e, "授予 WRITE_SECURE_SETTINGS 权限失败")
+            LOGGER.e(e, "Failed to grant WRITE_SECURE_SETTINGS")
         }
     }
 
@@ -35,38 +37,47 @@ object ManagerGrantHelper {
         try {
             val serviceName = "$MANAGER_APPLICATION_ID/.service.StellarAccessibilityService"
 
-            val process = Runtime.getRuntime().exec(arrayOf(
-                "settings", "get", "secure",
-                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
-            ))
+            val process = Runtime.getRuntime().exec(
+                arrayOf(
+                    "settings", "get", "secure",
+                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+                )
+            )
             val currentServices = process.inputStream.bufferedReader().readText().trim()
             process.waitFor()
 
-            if (currentServices.contains(serviceName)) {
-                LOGGER.i("无障碍服务已启用")
+            val services = currentServices
+                .split(":")
+                .map { it.trim() }
+                .filter { it.isNotEmpty() && it != "null" }
+                .toMutableSet()
+
+            if (services.contains(serviceName)) {
+                LOGGER.i("Accessibility service already enabled")
                 return
             }
 
-            val newServices = if (currentServices.isEmpty() || currentServices == "null") {
-                serviceName
-            } else {
-                "$currentServices:$serviceName"
-            }
+            services.add(serviceName)
+            val newServices = services.joinToString(":")
 
-            LOGGER.i("正在授予无障碍服务权限...")
-            Runtime.getRuntime().exec(arrayOf(
-                "settings", "put", "secure",
-                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-                newServices
-            )).waitFor()
-            Runtime.getRuntime().exec(arrayOf(
-                "settings", "put", "secure",
-                "accessibility_enabled",
-                "1"
-            )).waitFor()
-            LOGGER.i("无障碍服务权限授予完成")
+            LOGGER.i("Granting accessibility service...")
+            Runtime.getRuntime().exec(
+                arrayOf(
+                    "settings", "put", "secure",
+                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                    newServices
+                )
+            ).waitFor()
+            Runtime.getRuntime().exec(
+                arrayOf(
+                    "settings", "put", "secure",
+                    "accessibility_enabled",
+                    "1"
+                )
+            ).waitFor()
+            LOGGER.i("Accessibility service granted")
         } catch (e: Throwable) {
-            LOGGER.e(e, "授予无障碍服务权限失败")
+            LOGGER.e(e, "Failed to grant accessibility service")
         }
     }
 }

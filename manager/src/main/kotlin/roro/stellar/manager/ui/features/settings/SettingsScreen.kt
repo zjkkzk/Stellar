@@ -81,17 +81,14 @@ import kotlinx.coroutines.launch
 import roro.stellar.manager.BuildConfig
 import roro.stellar.manager.R
 import roro.stellar.manager.StellarSettings
-import roro.stellar.manager.StellarSettings.KEEP_START_ON_BOOT
-import roro.stellar.manager.StellarSettings.KEEP_START_ON_BOOT_WIRELESS
 import roro.stellar.manager.StellarManagerProvider.Companion.KEY_SHIZUKU_COMPAT
 import roro.stellar.manager.StellarSettings.SHIZUKU_COMPAT_ENABLED
-import roro.stellar.manager.StellarSettings.ACCESSIBILITY_AUTO_START
 import roro.stellar.manager.StellarSettings.TCPIP_PORT
 import roro.stellar.manager.StellarSettings.TCPIP_PORT_ENABLED
 import roro.stellar.manager.StellarSettings.DROP_PRIVILEGES
-import roro.stellar.manager.ktx.isComponentEnabled
 import roro.stellar.manager.ktx.setComponentEnabled
 import roro.stellar.manager.receiver.BootCompleteReceiver
+import roro.stellar.manager.startup.boot.BootScriptManager
 import roro.stellar.manager.ui.components.IconContainer
 import roro.stellar.manager.ui.components.LocalScreenConfig
 import roro.stellar.manager.ui.components.StellarSegmentedSelector
@@ -142,15 +139,12 @@ fun SettingsScreen(
     val preferences = StellarSettings.getPreferences()
 
     var hasRootPermission by remember { mutableStateOf<Boolean?>(null) }
-
-    var startOnBoot by remember { mutableStateOf(false) }
-
-    var startOnBootWireless by remember {
-        mutableStateOf(
-            context.packageManager.isComponentEnabled(componentName) &&
-            preferences.getBoolean(KEEP_START_ON_BOOT_WIRELESS, false)
-        )
-    }
+    var bootMode by remember { mutableStateOf(StellarSettings.getBootMode()) }
+    var scriptActionInProgress by remember { mutableStateOf(false) }
+    var showScriptInstallDialog by remember { mutableStateOf(false) }
+    var showScriptRemoveDialog by remember { mutableStateOf(false) }
+    var showBootGuideDialog by remember { mutableStateOf(false) }
+    var showAccessibilityHintDialog by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
     var currentSource by remember { mutableStateOf<UpdateSource?>(null) }
@@ -167,8 +161,11 @@ fun SettingsScreen(
         }
         hasRootPermission = isRoot
         if (isRoot) {
-            startOnBoot = context.packageManager.isComponentEnabled(componentName) &&
-                    !preferences.getBoolean(KEEP_START_ON_BOOT_WIRELESS, false)
+            val scriptInstalled = withContext(Dispatchers.IO) { BootScriptManager.isScriptInstalled() }
+            if (bootMode == StellarSettings.BootMode.SCRIPT && !scriptInstalled) {
+                bootMode = StellarSettings.BootMode.NONE
+                StellarSettings.setBootMode(StellarSettings.BootMode.NONE)
+            }
         }
         currentSource = UpdateUtils.getPreferredSource()
     }
@@ -183,10 +180,6 @@ fun SettingsScreen(
 
     var dropPrivileges by remember {
         mutableStateOf(preferences.getBoolean(DROP_PRIVILEGES, false))
-    }
-
-    var accessibilityAutoStart by remember {
-        mutableStateOf(preferences.getBoolean(ACCESSIBILITY_AUTO_START, false))
     }
 
     var currentThemeMode by remember { mutableStateOf(ThemePreferences.themeMode.value) }
@@ -279,76 +272,70 @@ fun SettingsScreen(
                     expanded = bootOptionsExpanded,
                     onExpandChange = { bootOptionsExpanded = it }
                 ) {
+                    // 开机广播开关
                     SettingsInnerSwitchRow(
-                        title = stringResource(R.string.boot_start_wireless),
-                        subtitle = stringResource(R.string.boot_start_wireless_subtitle),
-                        checked = startOnBootWireless,
+                        title = stringResource(R.string.boot_start_callback_mode),
+                        subtitle = stringResource(R.string.boot_start_callback_mode_subtitle),
+                        checked = bootMode == StellarSettings.BootMode.BROADCAST,
+                        enabled = true,
                         onCheckedChange = { newValue ->
                             if (newValue) {
-                                startOnBoot = false
-                                savePreference(KEEP_START_ON_BOOT, false)
+                                applyBootMode(
+                                    context, componentName, StellarSettings.BootMode.BROADCAST,
+                                    bootMode, scope
+                                ) {
+                                    bootMode = StellarSettings.BootMode.BROADCAST
+                                    showBootGuideDialog = true
+                                }
+                            } else {
+                                applyBootMode(
+                                    context, componentName, StellarSettings.BootMode.NONE,
+                                    bootMode, scope
+                                ) { bootMode = StellarSettings.BootMode.NONE }
                             }
-                            startOnBootWireless = newValue
-                            toggleBootComponent(
-                                context,
-                                componentName,
-                                KEEP_START_ON_BOOT_WIRELESS,
-                                newValue || startOnBoot
-                            )
                         }
                     )
 
-                    SettingsInnerSwitchRow(
-                        title = stringResource(R.string.boot_start_root),
-                        subtitle = stringResource(R.string.boot_start_root_subtitle),
-                        checked = startOnBoot,
-                        enabled = hasRootPermission == true,
-                        onCheckedChange = { newValue ->
-                            if (newValue) {
-                                startOnBootWireless = false
-                                savePreference(KEEP_START_ON_BOOT_WIRELESS, false)
-                            }
-                            startOnBoot = newValue
-                            toggleBootComponent(
-                                context,
-                                componentName,
-                                KEEP_START_ON_BOOT,
-                                newValue || startOnBootWireless
-                            )
-                        }
-                    )
-
+                    // 无障碍自启开关
                     SettingsInnerSwitchRow(
                         title = stringResource(R.string.accessibility_auto_start),
-                        subtitle = if (isServiceRunning) {
-                            stringResource(R.string.accessibility_auto_start_subtitle)
-                        } else {
-                            stringResource(R.string.accessibility_auto_start_subtitle_disabled)
-                        },
-                        checked = accessibilityAutoStart,
-                        enabled = isServiceRunning,
+                        subtitle = stringResource(R.string.accessibility_auto_start_subtitle),
+                        checked = bootMode == StellarSettings.BootMode.ACCESSIBILITY,
+                        enabled = true,
                         onCheckedChange = { newValue ->
-                            accessibilityAutoStart = newValue
-                            savePreference(ACCESSIBILITY_AUTO_START, newValue)
-                            scope.launch(Dispatchers.IO) {
-                                try {
-                                    val db = AppDatabase.get(context)
-                                    db.configDao().set(ConfigEntity("accessibilityAutoStart", newValue.toString()))
-                                } catch (_: Exception) {}
-                                try {
-                                    toggleAccessibilityServiceViaAdb(newValue)
-                                } catch (e: Exception) {
-                                    Log.e(TAG, "操作无障碍服务失败", e)
-                                    accessibilityAutoStart = !newValue
-                                    savePreference(ACCESSIBILITY_AUTO_START, !newValue)
-                                    try {
-                                        val db = AppDatabase.get(context)
-                                        db.configDao().set(ConfigEntity("accessibilityAutoStart", (!newValue).toString()))
-                                    } catch (_: Exception) {}
-                                    withContext(Dispatchers.Main) {
-                                        Toast.makeText(context, context.getString(R.string.accessibility_toggle_failed), Toast.LENGTH_SHORT).show()
-                                    }
+                            if (newValue) {
+                                if (!preferences.getBoolean(StellarSettings.ACCESSIBILITY_AUTO_START_PROMPTED, false)) {
+                                    showAccessibilityHintDialog = true
+                                } else {
+                                    applyBootMode(
+                                        context, componentName, StellarSettings.BootMode.ACCESSIBILITY,
+                                        bootMode, scope
+                                    ) { bootMode = StellarSettings.BootMode.ACCESSIBILITY }
                                 }
+                            } else {
+                                applyBootMode(
+                                    context, componentName, StellarSettings.BootMode.NONE,
+                                    bootMode, scope
+                                ) { bootMode = StellarSettings.BootMode.NONE }
+                            }
+                        }
+                    )
+
+                    // 开机脚本开关
+                    SettingsInnerSwitchRow(
+                        title = stringResource(R.string.boot_start_script_mode),
+                        subtitle = if (hasRootPermission == true) {
+                            stringResource(R.string.boot_start_script_mode_subtitle)
+                        } else {
+                            stringResource(R.string.boot_start_script_mode_subtitle_no_root)
+                        },
+                        checked = bootMode == StellarSettings.BootMode.SCRIPT,
+                        enabled = hasRootPermission == true && !scriptActionInProgress,
+                        onCheckedChange = { newValue ->
+                            if (newValue) {
+                                showScriptInstallDialog = true
+                            } else {
+                                showScriptRemoveDialog = true
                             }
                         }
                     )
@@ -754,6 +741,192 @@ fun SettingsScreen(
             }
         )
     }
+
+    if (showAccessibilityHintDialog) {
+        BasicAlertDialog(onDismissRequest = { showAccessibilityHintDialog = false }) {
+            Surface(
+                shape = AppShape.shapes.dialog,
+                color = MaterialTheme.colorScheme.surfaceContainerHigh
+            ) {
+                Column(modifier = Modifier.padding(24.dp)) {
+                    Text(
+                        text = stringResource(R.string.accessibility_hint_title),
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = stringResource(R.string.accessibility_hint_message),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        TextButton(onClick = { showAccessibilityHintDialog = false }) {
+                            Text(stringResource(android.R.string.cancel))
+                        }
+                        TextButton(onClick = {
+                            showAccessibilityHintDialog = false
+                            savePreference(StellarSettings.ACCESSIBILITY_AUTO_START_PROMPTED, true)
+                            applyBootMode(
+                                context, componentName, StellarSettings.BootMode.ACCESSIBILITY,
+                                bootMode, scope
+                            ) { bootMode = StellarSettings.BootMode.ACCESSIBILITY }
+                        }) {
+                            Text(stringResource(android.R.string.ok))
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (showBootGuideDialog) {
+        BasicAlertDialog(onDismissRequest = { showBootGuideDialog = false }) {
+            Surface(
+                shape = AppShape.shapes.dialog,
+                color = MaterialTheme.colorScheme.surfaceContainerHigh
+            ) {
+                Column(modifier = Modifier.padding(24.dp)) {
+                    Text(
+                        text = stringResource(R.string.boot_start_guide_title),
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = stringResource(R.string.boot_start_guide_message),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        TextButton(onClick = { showBootGuideDialog = false }) {
+                            Text(stringResource(android.R.string.cancel))
+                        }
+                        TextButton(onClick = {
+                            showBootGuideDialog = false
+                            val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                data = "package:${context.packageName}".toUri()
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            context.startActivity(intent)
+                        }) {
+                            Text(stringResource(R.string.boot_start_guide_go_settings))
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (showScriptInstallDialog) {
+        BasicAlertDialog(onDismissRequest = { showScriptInstallDialog = false }) {
+            Surface(
+                shape = AppShape.shapes.dialog,
+                color = MaterialTheme.colorScheme.surfaceContainerHigh
+            ) {
+                Column(modifier = Modifier.padding(24.dp)) {
+                    Text(
+                        text = stringResource(R.string.boot_start_script_install_confirm_title),
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = stringResource(R.string.boot_start_script_install_confirm_message),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        TextButton(onClick = { showScriptInstallDialog = false }) {
+                            Text(stringResource(android.R.string.cancel))
+                        }
+                        TextButton(onClick = {
+                            showScriptInstallDialog = false
+                            scriptActionInProgress = true
+                            scope.launch(Dispatchers.IO) {
+                                val result = BootScriptManager.installScript()
+                                withContext(Dispatchers.Main) {
+                                    scriptActionInProgress = false
+                                    if (result.success) {
+                                        applyBootMode(
+                                            context, componentName, StellarSettings.BootMode.SCRIPT,
+                                            bootMode, scope
+                                        ) { bootMode = StellarSettings.BootMode.SCRIPT }
+                                    }
+                                    Toast.makeText(
+                                        context,
+                                        if (result.success) context.getString(R.string.boot_script_install_success)
+                                        else context.getString(R.string.boot_script_install_failed, result.message),
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            }
+                        }) {
+                            Text(stringResource(android.R.string.ok))
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (showScriptRemoveDialog) {
+        BasicAlertDialog(onDismissRequest = { showScriptRemoveDialog = false }) {
+            Surface(
+                shape = AppShape.shapes.dialog,
+                color = MaterialTheme.colorScheme.surfaceContainerHigh
+            ) {
+                Column(modifier = Modifier.padding(24.dp)) {
+                    Text(
+                        text = stringResource(R.string.boot_start_script_remove_confirm_title),
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = stringResource(R.string.boot_start_script_remove_confirm_message),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        TextButton(onClick = { showScriptRemoveDialog = false }) {
+                            Text(stringResource(android.R.string.cancel))
+                        }
+                        TextButton(onClick = {
+                            showScriptRemoveDialog = false
+                            scriptActionInProgress = true
+                            scope.launch(Dispatchers.IO) {
+                                val result = BootScriptManager.removeScript()
+                                withContext(Dispatchers.Main) {
+                                    scriptActionInProgress = false
+                                    if (result.success) {
+                                        StellarSettings.setBootMode(StellarSettings.BootMode.NONE)
+                                        bootMode = StellarSettings.BootMode.NONE
+                                    }
+                                    Toast.makeText(
+                                        context,
+                                        if (result.success) context.getString(R.string.boot_script_remove_success)
+                                        else context.getString(R.string.boot_script_remove_failed, result.message),
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            }
+                        }) {
+                            Text(stringResource(android.R.string.ok))
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -774,29 +947,47 @@ private fun savePreference(key: String, value: Boolean) {
     StellarSettings.getPreferences().edit { putBoolean(key, value) }
 }
 
-private fun toggleBootComponent(
+/**
+ * 切换开机启动模式，互斥三选一。
+ * 切换前先清理旧模式的副作用，再应用新模式。
+ */
+private fun applyBootMode(
     context: Context,
     componentName: ComponentName,
-    key: String,
-    enabled: Boolean
-): Boolean {
-    savePreference(key, enabled)
-
-    try {
-        context.packageManager.setComponentEnabled(componentName, enabled)
-
-        val isEnabled = context.packageManager.isComponentEnabled(componentName) == enabled
-        if (!isEnabled) {
-            Log.e(TAG, "设置组件状态失败: $componentName 到 $enabled")
-            return false
+    newMode: StellarSettings.BootMode,
+    currentMode: StellarSettings.BootMode,
+    scope: kotlinx.coroutines.CoroutineScope,
+    onSuccess: () -> Unit
+) {
+    scope.launch(Dispatchers.IO) {
+        try {
+            // 清理旧模式的 BootCompleteReceiver 状态
+            when (currentMode) {
+                StellarSettings.BootMode.BROADCAST,
+                StellarSettings.BootMode.ACCESSIBILITY -> {
+                    context.packageManager.setComponentEnabled(componentName, false)
+                }
+                StellarSettings.BootMode.SCRIPT, StellarSettings.BootMode.NONE -> Unit
+            }
+            // 应用新模式
+            when (newMode) {
+                StellarSettings.BootMode.BROADCAST,
+                StellarSettings.BootMode.ACCESSIBILITY -> {
+                    context.packageManager.setComponentEnabled(componentName, true)
+                }
+                StellarSettings.BootMode.SCRIPT, StellarSettings.BootMode.NONE -> Unit
+            }
+            // 同步 accessibilityAutoStart 字段供 server 端读取
+            val accessibilityEnabled = newMode == StellarSettings.BootMode.ACCESSIBILITY
+            AppDatabase.get(context).configDao().set(
+                ConfigEntity("accessibilityAutoStart", accessibilityEnabled.toString())
+            )
+            StellarSettings.setBootMode(newMode)
+            withContext(Dispatchers.Main) { onSuccess() }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to apply boot mode $newMode", e)
         }
-
-    } catch (e: Exception) {
-        Log.e(TAG, "启用启动组件失败", e)
-        return false
     }
-
-    return true
 }
 
 private fun executeAdbCommand(command: String): String {
@@ -811,28 +1002,27 @@ private fun toggleAccessibilityServiceViaAdb(enable: Boolean) {
     val serviceName = "roro.stellar.manager/.service.StellarAccessibilityService"
 
     val currentServices = executeAdbCommand("settings get secure enabled_accessibility_services")
+    val services = currentServices
+        .split(":")
+        .map { it.trim() }
+        .filter { it.isNotEmpty() && it != "null" }
+        .toMutableSet()
 
     if (enable) {
-        if (currentServices.contains(serviceName)) return
-
-        val newServices = if (currentServices.isEmpty() || currentServices == "null") {
-            serviceName
-        } else {
-            "$currentServices:$serviceName"
-        }
-        executeAdbCommand("settings put secure enabled_accessibility_services '$newServices'")
+        services.add(serviceName)
+        val newServices = services.joinToString(":")
+        executeAdbCommand("settings put secure enabled_accessibility_services \"$newServices\"")
         executeAdbCommand("settings put secure accessibility_enabled 1")
     } else {
-        val newServices = currentServices
-            .split(":")
-            .filter { it != serviceName }
-            .joinToString(":")
+        services.remove(serviceName)
+        val newServices = services.joinToString(":")
 
         if (newServices.isEmpty()) {
             executeAdbCommand("settings put secure enabled_accessibility_services null")
             executeAdbCommand("settings put secure accessibility_enabled 0")
         } else {
-            executeAdbCommand("settings put secure enabled_accessibility_services '$newServices'")
+            executeAdbCommand("settings put secure enabled_accessibility_services \"$newServices\"")
+            executeAdbCommand("settings put secure accessibility_enabled 1")
         }
     }
 }

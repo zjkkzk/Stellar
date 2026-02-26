@@ -87,10 +87,23 @@
     <string name="boot_start_wireless_subtitle">Démarrer via le débogage sans fil au boot</string>
     <string name="boot_start_root">Root</string>
     <string name="boot_start_root_subtitle">Démarrer via Root au boot</string>
+    <string name="boot_start_callback_mode">Diffusion au démarrage</string>
+    <string name="boot_start_callback_mode_subtitle">Démarrage automatique au boot via diffusion système</string>
+    <string name="boot_start_script_mode">Script de démarrage</string>
+    <string name="boot_start_script_mode_subtitle">Démarrage automatique au boot via script Root</string>
+    <string name="boot_start_script_mode_subtitle_no_root">Nécessite un accès Root</string>
+    <string name="boot_start_script_install_confirm_title">Installer le script de démarrage</string>
+    <string name="boot_start_script_install_confirm_message">Un script de démarrage automatique sera créé dans /data/adb/service.d/, nécessite un accès Root. Confirmer l\'installation ?</string>
+    <string name="boot_start_script_remove_confirm_title">Supprimer le script de démarrage</string>
+    <string name="boot_start_script_remove_confirm_message">Le script de démarrage /data/adb/service.d/stellar.sh sera supprimé. Confirmer la suppression ?</string>
     <string name="accessibility_auto_start">Accessibilité</string>
-    <string name="accessibility_auto_start_subtitle">Démarrer au boot via le service d\'accessibilité</string>
-    <string name="accessibility_auto_start_subtitle_disabled">Modifiable uniquement lorsque le service est en cours d\'exécution</string>
+    <string name="accessibility_auto_start_subtitle">Activer la diffusion au démarrage via le service d\'accessibilité</string>
     <string name="accessibility_toggle_failed">Échec de la modification du service d\'accessibilité, le service n\'est peut-être pas en cours d\'exécution</string>
+    <string name="accessibility_hint_title">Accorder automatiquement la permission d\'accessibilité</string>
+    <string name="accessibility_hint_message">Lorsqu\'activé, Stellar recevra automatiquement la permission du service d\'accessibilité pour activer la diffusion au démarrage. Cette invite n\'apparaîtra qu\'une seule fois.</string>
+    <string name="boot_start_guide_title">Guide de configuration</string>
+    <string name="boot_start_guide_message">La diffusion au démarrage est activée. Pour s\'assurer que le démarrage automatique fonctionne correctement, vérifiez les permissions de démarrage automatique dans les paramètres système.</string>
+    <string name="boot_start_guide_go_settings">Aller aux paramètres</string>
     <string name="shizuku_compat_layer">Compatibilité Shizuku</string>
     <string name="shizuku_compat_layer_subtitle">Autoriser les applications Shizuku à fonctionner via Stellar</string>
     <string name="shizuku_compat_enabled">Compatibilité Shizuku activée</string>
@@ -271,6 +284,10 @@
     <string name="boot_start_success">Le service Stellar a démarré avec succès au boot</string>
     <string name="boot_start_failed">Échec du démarrage au boot de Stellar : %s</string>
     <string name="boot_start_root_no_permission">Accès Root indisponible, échec du démarrage au boot</string>
+    <string name="boot_script_install_success">Script de démarrage créé avec succès</string>
+    <string name="boot_script_install_failed">Échec de la création du script de démarrage : %s</string>
+    <string name="boot_script_remove_success">Script de démarrage supprimé</string>
+    <string name="boot_script_remove_failed">Échec de la suppression du script de démarrage : %s</string>
     <string name="adb_key_error">Erreur de clé ADB</string>
     <string name="adb_connection_failed">Échec de la connexion ADB %1$s:%2$d</string>
 

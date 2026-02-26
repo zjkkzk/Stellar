@@ -13,9 +13,9 @@ class StellarReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         if (!ServiceStatus().isRunning) {
-            val startOnBootWirelessIsEnabled = StellarSettings.getPreferences()
-                .getBoolean(StellarSettings.KEEP_START_ON_BOOT_WIRELESS, false)
-            if (startOnBootWirelessIsEnabled) {
+            val scriptModeEnabled = StellarSettings.getPreferences()
+                .getBoolean(StellarSettings.BOOT_SCRIPT_ENABLED, false)
+            if (!scriptModeEnabled) {
                 val wirelessAdbStatus = adbWirelessHelper.validateThenEnableWirelessAdb(
                     context.contentResolver, context
                 )

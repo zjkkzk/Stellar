@@ -10,13 +10,28 @@ object StellarSettings {
     const val NAME = "settings"
     const val KEEP_START_ON_BOOT = "start_on_boot"
     const val KEEP_START_ON_BOOT_WIRELESS = "start_on_boot_wireless"
+    const val BOOT_SCRIPT_ENABLED = "boot_script_enabled"
+    const val BOOT_MODE = "boot_mode"
     const val TCPIP_PORT = "tcpip_port"
     const val TCPIP_PORT_ENABLED = "tcpip_port_enabled"
     const val THEME_MODE = "theme_mode"
     const val DROP_PRIVILEGES = "drop_privileges"
     const val SHIZUKU_COMPAT_ENABLED = "shizuku_compat_enabled"
     const val ACCESSIBILITY_AUTO_START = "accessibility_auto_start"
+    const val ACCESSIBILITY_AUTO_START_PROMPTED = "accessibility_auto_start_prompted"
     const val LAST_VERSION_CODE = "last_version_code"
+
+    /** 开机启动模式，三选一，默认 NONE */
+    enum class BootMode { NONE, BROADCAST, ACCESSIBILITY, SCRIPT }
+
+    fun getBootMode(): BootMode {
+        val name = getPreferences().getString(BOOT_MODE, BootMode.NONE.name) ?: BootMode.NONE.name
+        return runCatching { BootMode.valueOf(name) }.getOrDefault(BootMode.NONE)
+    }
+
+    fun setBootMode(mode: BootMode) {
+        getPreferences().edit().putString(BOOT_MODE, mode.name).apply()
+    }
 
     private var preferences: SharedPreferences? = null
 

@@ -87,10 +87,23 @@
     <string name="boot_start_wireless_subtitle">Запуск через беспроводную отладку при загрузке</string>
     <string name="boot_start_root">Root</string>
     <string name="boot_start_root_subtitle">Запуск через Root при загрузке</string>
+    <string name="boot_start_callback_mode">Широковещание при загрузке</string>
+    <string name="boot_start_callback_mode_subtitle">Автозапуск при загрузке через системное широковещание</string>
+    <string name="boot_start_script_mode">Скрипт загрузки</string>
+    <string name="boot_start_script_mode_subtitle">Автозапуск при загрузке через Root-скрипт</string>
+    <string name="boot_start_script_mode_subtitle_no_root">Требуется Root-доступ</string>
+    <string name="boot_start_script_install_confirm_title">Установить скрипт загрузки</string>
+    <string name="boot_start_script_install_confirm_message">Скрипт автозапуска будет создан в /data/adb/service.d/, требуется Root-доступ. Подтвердить установку?</string>
+    <string name="boot_start_script_remove_confirm_title">Удалить скрипт загрузки</string>
+    <string name="boot_start_script_remove_confirm_message">Скрипт загрузки /data/adb/service.d/stellar.sh будет удалён. Подтвердить удаление?</string>
     <string name="accessibility_auto_start">Спец. возможности</string>
-    <string name="accessibility_auto_start_subtitle">Запуск при загрузке через службу спец. возможностей</string>
-    <string name="accessibility_auto_start_subtitle_disabled">Доступно только при запущенном сервисе</string>
-    <string name="accessibility_toggle_failed">Не удалось изменить службу специальных возможностей, сервис может быть не запущен</string>
+    <string name="accessibility_auto_start_subtitle">Пробуждение широковещания при загрузке через службу спец. возможностей</string>
+    <string name="accessibility_toggle_failed">Не удалось переключить службу специальных возможностей, сервис может быть не запущен</string>
+    <string name="accessibility_hint_title">Автоматически выдать разрешение спец. возможностей</string>
+    <string name="accessibility_hint_message">При включении Stellar автоматически получит разрешение службы спец. возможностей для пробуждения широковещания при загрузке. Это уведомление появится только один раз.</string>
+    <string name="boot_start_guide_title">Руководство по настройке</string>
+    <string name="boot_start_guide_message">Широковещание при загрузке включено. Для корректной работы автозапуска проверьте разрешения автозапуска в системных настройках.</string>
+    <string name="boot_start_guide_go_settings">Перейти в настройки</string>
     <string name="shizuku_compat_layer">Совместимость с Shizuku</string>
     <string name="shizuku_compat_layer_subtitle">Разрешить приложениям Shizuku работать через Stellar</string>
     <string name="shizuku_compat_enabled">Совместимость с Shizuku включена</string>
@@ -271,6 +284,10 @@
     <string name="boot_start_success">Сервис Stellar успешно запущен при загрузке</string>
     <string name="boot_start_failed">Ошибка автозапуска Stellar: %s</string>
     <string name="boot_start_root_no_permission">Root-доступ недоступен, автозапуск не удался</string>
+    <string name="boot_script_install_success">Скрипт загрузки успешно создан</string>
+    <string name="boot_script_install_failed">Не удалось создать скрипт загрузки: %s</string>
+    <string name="boot_script_remove_success">Скрипт загрузки удалён</string>
+    <string name="boot_script_remove_failed">Не удалось удалить скрипт загрузки: %s</string>
     <string name="adb_key_error">Ошибка ключа ADB</string>
     <string name="adb_connection_failed">Ошибка подключения ADB %1$s:%2$d</string>
 

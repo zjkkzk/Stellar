@@ -89,10 +89,23 @@
     <string name="boot_start_wireless_subtitle">Start via wireless debugging on boot</string>
     <string name="boot_start_root">Root</string>
     <string name="boot_start_root_subtitle">Start via root on boot</string>
-    <string name="accessibility_auto_start">Accessibility</string>
-    <string name="accessibility_auto_start_subtitle">Start on boot via accessibility service</string>
-    <string name="accessibility_auto_start_subtitle_disabled">Only adjustable when service is running</string>
+    <string name="boot_start_callback_mode">Boot Broadcast</string>
+    <string name="boot_start_callback_mode_subtitle">Auto-start on boot via system broadcast</string>
+    <string name="boot_start_script_mode">Boot Script</string>
+    <string name="boot_start_script_mode_subtitle">Auto-start on boot via root script</string>
+    <string name="boot_start_script_mode_subtitle_no_root">Requires root access</string>
+    <string name="boot_start_script_install_confirm_title">Install Boot Script</string>
+    <string name="boot_start_script_install_confirm_message">A boot script will be created at /data/adb/service.d/, requiring root access. Confirm install?</string>
+    <string name="boot_start_script_remove_confirm_title">Remove Boot Script</string>
+    <string name="boot_start_script_remove_confirm_message">The boot script /data/adb/service.d/stellar.sh will be deleted. Confirm removal?</string>
+    <string name="accessibility_auto_start">Accessibility Auto-start</string>
+    <string name="accessibility_auto_start_subtitle">Wake boot broadcast via accessibility service</string>
     <string name="accessibility_toggle_failed">Failed to toggle accessibility service, service may not be running</string>
+    <string name="accessibility_hint_title">Auto-grant Accessibility Permission</string>
+    <string name="accessibility_hint_message">When enabled, Stellar will automatically be granted accessibility service permission to wake the boot broadcast. This prompt will only appear once.</string>
+    <string name="boot_start_guide_title">Setup Guide</string>
+    <string name="boot_start_guide_message">Boot broadcast is enabled. To ensure auto-start works correctly, please check auto-start permissions in system settings.</string>
+    <string name="boot_start_guide_go_settings">Go to Settings</string>
     <string name="shizuku_compat_layer">Shizuku Compatibility</string>
     <string name="shizuku_compat_layer_subtitle">Allow Shizuku apps to run through Stellar</string>
     <string name="shizuku_compat_enabled">Shizuku compatibility enabled</string>
@@ -273,6 +286,10 @@
     <string name="boot_start_success">Stellar service started successfully on boot</string>
     <string name="boot_start_failed">Stellar boot start failed: %s</string>
     <string name="boot_start_root_no_permission">Root access unavailable, boot start failed</string>
+    <string name="boot_script_install_success">Boot script created successfully</string>
+    <string name="boot_script_install_failed">Failed to create boot script: %s</string>
+    <string name="boot_script_remove_success">Boot script removed successfully</string>
+    <string name="boot_script_remove_failed">Failed to remove boot script: %s</string>
     <string name="adb_key_error">ADB key error</string>
     <string name="adb_connection_failed">ADB connection failed %1$s:%2$d</string>
 

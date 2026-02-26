@@ -355,6 +355,10 @@ class StellarService : IStellarService.Stub() {
         }
 
         if (isManager) {
+            if (configManager.isAccessibilityAutoStartEnabled()) {
+                LOGGER.i("管理器已连接，授予无障碍服务权限...")
+                ManagerGrantHelper.grantAccessibilityService()
+            }
             try {
                 application.asBinder().linkToDeath({
                     LOGGER.i("管理器进程已死亡")

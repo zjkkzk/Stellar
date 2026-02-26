@@ -87,10 +87,23 @@
     <string name="boot_start_wireless_subtitle">التشغيل عبر التصحيح اللاسلكي عند الإقلاع</string>
     <string name="boot_start_root">Root</string>
     <string name="boot_start_root_subtitle">التشغيل عبر Root عند الإقلاع</string>
+    <string name="boot_start_callback_mode">بث الإقلاع</string>
+    <string name="boot_start_callback_mode_subtitle">التشغيل التلقائي عند الإقلاع عبر بث النظام</string>
+    <string name="boot_start_script_mode">سكريبت الإقلاع</string>
+    <string name="boot_start_script_mode_subtitle">التشغيل التلقائي عند الإقلاع عبر سكريبت Root</string>
+    <string name="boot_start_script_mode_subtitle_no_root">يتطلب صلاحية Root</string>
+    <string name="boot_start_script_install_confirm_title">تثبيت سكريبت الإقلاع</string>
+    <string name="boot_start_script_install_confirm_message">سيتم إنشاء سكريبت التشغيل التلقائي في /data/adb/service.d/، يتطلب صلاحية Root. تأكيد التثبيت؟</string>
+    <string name="boot_start_script_remove_confirm_title">إزالة سكريبت الإقلاع</string>
+    <string name="boot_start_script_remove_confirm_message">سيتم حذف سكريبت الإقلاع /data/adb/service.d/stellar.sh. تأكيد الإزالة؟</string>
     <string name="accessibility_auto_start">إمكانية الوصول</string>
-    <string name="accessibility_auto_start_subtitle">التشغيل عند الإقلاع عبر خدمة إمكانية الوصول</string>
-    <string name="accessibility_auto_start_subtitle_disabled">يمكن التعديل فقط عند تشغيل الخدمة</string>
+    <string name="accessibility_auto_start_subtitle">تنشيط بث الإقلاع عبر خدمة إمكانية الوصول</string>
     <string name="accessibility_toggle_failed">فشل في تعديل خدمة إمكانية الوصول، قد لا تكون الخدمة قيد التشغيل</string>
+    <string name="accessibility_hint_title">منح إذن إمكانية الوصول تلقائياً</string>
+    <string name="accessibility_hint_message">عند التفعيل، سيحصل Stellar تلقائياً على إذن خدمة إمكانية الوصول لتنشيط بث الإقلاع. سيظهر هذا الإشعار مرة واحدة فقط.</string>
+    <string name="boot_start_guide_title">دليل الإعداد</string>
+    <string name="boot_start_guide_message">تم تفعيل بث الإقلاع. لضمان عمل التشغيل التلقائي بشكل صحيح، يرجى التحقق من أذونات التشغيل التلقائي في إعدادات النظام.</string>
+    <string name="boot_start_guide_go_settings">الذهاب إلى الإعدادات</string>
     <string name="shizuku_compat_layer">توافق Shizuku</string>
     <string name="shizuku_compat_layer_subtitle">السماح لتطبيقات Shizuku بالعمل عبر Stellar</string>
     <string name="shizuku_compat_enabled">تم تفعيل توافق Shizuku</string>
@@ -271,6 +284,10 @@
     <string name="boot_start_success">تم تشغيل خدمة Stellar بنجاح عند الإقلاع</string>
     <string name="boot_start_failed">فشل التشغيل عند الإقلاع لـ Stellar: %s</string>
     <string name="boot_start_root_no_permission">صلاحية Root غير متاحة، فشل التشغيل عند الإقلاع</string>
+    <string name="boot_script_install_success">تم إنشاء سكريبت الإقلاع بنجاح</string>
+    <string name="boot_script_install_failed">فشل إنشاء سكريبت الإقلاع: %s</string>
+    <string name="boot_script_remove_success">تم إزالة سكريبت الإقلاع</string>
+    <string name="boot_script_remove_failed">فشل إزالة سكريبت الإقلاع: %s</string>
     <string name="adb_key_error">خطأ في مفتاح ADB</string>
     <string name="adb_connection_failed">فشل اتصال ADB ‏%1$s:%2$d</string>
 

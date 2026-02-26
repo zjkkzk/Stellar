@@ -10,7 +10,6 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import com.topjohnwu.superuser.Shell
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -36,67 +35,85 @@ class BootCompleteReceiver : BroadcastReceiver() {
 
         if (UserHandleCompat.myUserId() > 0 || Stellar.pingBinder()) return
 
-        val startOnBootRootIsEnabled = StellarSettings.getPreferences()
-            .getBoolean(StellarSettings.KEEP_START_ON_BOOT, false)
-        val startOnBootWirelessIsEnabled = StellarSettings.getPreferences()
-            .getBoolean(StellarSettings.KEEP_START_ON_BOOT_WIRELESS, false)
-
-        if (startOnBootRootIsEnabled) {
-            rootStart(context)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-            && context.checkSelfPermission(WRITE_SECURE_SETTINGS) == PackageManager.PERMISSION_GRANTED
-            && startOnBootWirelessIsEnabled
-        ) {
-            adbStart(context)
-        } else {
-            Log.w(AppConstants.TAG, "不支持开机启动")
-        }
-    }
-
-    private fun rootStart(context: Context) {
-        if (!Shell.getShell().isRoot) {
-            Shell.getCachedShell()?.close()
-            showToast(context, context.getString(R.string.boot_start_failed, context.getString(R.string.boot_start_root_no_permission)))
-            return
-        }
-
-        val result = Shell.cmd(Starter.internalCommand).exec()
-        Handler(Looper.getMainLooper()).postDelayed({
-            if (Stellar.pingBinder()) {
-                showToast(context, context.getString(R.string.boot_start_success))
-            } else {
-                val err = result.err.joinToString("\n").ifEmpty { "exit code: ${result.code}" }
-                showToast(context, context.getString(R.string.boot_start_failed, err))
-            }
-        }, 3000)
-    }
-
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    private fun adbStart(context: Context) {
-        Log.i(
-            AppConstants.TAG,
-            "WRITE_SECURE_SETTINGS 已启用且用户已启用无线 ADB 开机启动"
-        )
+        val mode = StellarSettings.getBootMode()
+        if (mode == StellarSettings.BootMode.NONE || mode == StellarSettings.BootMode.SCRIPT) return
 
         val pending = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val wirelessAdbStatus = adbWirelessHelper.validateThenEnableWirelessAdbAsync(
-                    context.contentResolver, context, 15_000L
-                )
-                if (wirelessAdbStatus) {
-                    val intentService = Intent(context, SelfStarterService::class.java)
-                    context.startService(intentService)
+                val started = if (hasRootPermission()) {
+                    rootStart(context) || adbStart(context)
+                } else {
+                    adbStart(context)
                 }
-            } catch (e: SecurityException) {
-                Log.e(AppConstants.TAG, "权限被拒绝", e)
-                showToast(context, context.getString(R.string.boot_start_failed, e.message ?: ""))
-            } catch (e: Exception) {
-                Log.e(AppConstants.TAG, "启动无线ADB时出错", e)
-                showToast(context, context.getString(R.string.boot_start_failed, e.message ?: ""))
+                if (!started) {
+                    showToast(context, context.getString(R.string.boot_start_failed, "no available startup path"))
+                }
             } finally {
                 pending.finish()
             }
+        }
+    }
+
+    private fun hasRootPermission(): Boolean {
+        return try {
+            Shell.getShell().isRoot
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    private fun rootStart(context: Context): Boolean {
+        val result = try {
+            Shell.cmd(Starter.internalCommand).exec()
+        } catch (e: Exception) {
+            Log.e(AppConstants.TAG, "Root boot start failed", e)
+            return false
+        }
+
+        if (result.code != 0) {
+            val err = result.err.joinToString("\n").ifEmpty { "exit code: ${result.code}" }
+            Log.w(AppConstants.TAG, "Root boot start command failed: $err")
+            return false
+        }
+
+        Thread.sleep(3000)
+        if (Stellar.pingBinder()) {
+            showToast(context, context.getString(R.string.boot_start_success))
+            return true
+        }
+
+        Log.w(AppConstants.TAG, "Root boot start command succeeded but binder not available")
+        return false
+    }
+
+    private suspend fun adbStart(context: Context): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
+            || context.checkSelfPermission(WRITE_SECURE_SETTINGS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            Log.w(AppConstants.TAG, "WRITE_SECURE_SETTINGS not granted, skip wireless startup")
+            return false
+        }
+
+        return try {
+            val wirelessAdbStatus = adbWirelessHelper.validateThenEnableWirelessAdbAsync(
+                context.contentResolver, context, 15_000L
+            )
+            if (wirelessAdbStatus) {
+                val intentService = Intent(context, SelfStarterService::class.java)
+                context.startService(intentService)
+                true
+            } else {
+                false
+            }
+        } catch (e: SecurityException) {
+            Log.e(AppConstants.TAG, "Permission denied while starting wireless adb", e)
+            showToast(context, context.getString(R.string.boot_start_failed, e.message ?: ""))
+            false
+        } catch (e: Exception) {
+            Log.e(AppConstants.TAG, "Failed to start wireless adb", e)
+            showToast(context, context.getString(R.string.boot_start_failed, e.message ?: ""))
+            false
         }
     }
 
@@ -106,3 +123,4 @@ class BootCompleteReceiver : BroadcastReceiver() {
         }
     }
 }
+
