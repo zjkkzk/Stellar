@@ -41,10 +41,8 @@ android {
 
     buildTypes {
         debug {
-            signingConfig signingConfigs.sign
         }
         release {
-            signingConfig signingConfigs.sign
             minifyEnabled true
             shrinkResources true
             proguardFiles 'proguard-rules.pro'
@@ -164,4 +162,3 @@ dependencies {
     ksp managerLibs.roomCompiler
     implementation managerLibs.gson
 }
-apply from: rootProject.file('signing.gradle')
