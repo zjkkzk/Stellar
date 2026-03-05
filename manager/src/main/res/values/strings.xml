@@ -113,6 +113,8 @@
     <string name="setting_failed">Setting failed: %s</string>
     <string name="drop_privileges">Drop Privileges</string>
     <string name="drop_privileges_subtitle">Run as shell user after root start</string>
+    <string name="daemon_enabled">Process Daemon</string>
+    <string name="daemon_enabled_subtitle">Mutual process monitoring for auto-restart</string>
     <string name="tcpip_port">TCP/IP Port</string>
     <string name="tcpip_port_subtitle">Switch adbd TCP/IP port after starting via wireless debugging</string>
     <string name="cannot_generate_safe_port">Cannot generate a safe port, please set manually</string>

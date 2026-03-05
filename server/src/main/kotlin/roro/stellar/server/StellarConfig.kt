@@ -12,6 +12,8 @@ class StellarConfig {
     var shizukuCompatEnabled: Boolean = true
     @SerializedName("accessibilityAutoStart")
     var accessibilityAutoStart: Boolean = false
+    @SerializedName("daemonEnabled")
+    var daemonEnabled: Boolean = false
 
     class PackageEntry {
         @SerializedName("packages")

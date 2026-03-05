@@ -111,6 +111,8 @@
     <string name="setting_failed">設定失敗: %s</string>
     <string name="drop_privileges">降權啟動</string>
     <string name="drop_privileges_subtitle">Root 啟動後降權到 Shell 使用者執行</string>
+    <string name="daemon_enabled">行程守護</string>
+    <string name="daemon_enabled_subtitle">雙行程互守，自動重啟</string>
     <string name="tcpip_port">TCP/IP 連接埠</string>
     <string name="tcpip_port_subtitle">透過無線偵錯啟動後，將 adbd 的 TCP/IP 連接埠切換到指定連接埠</string>
     <string name="cannot_generate_safe_port">無法產生安全連接埠，請手動設定</string>

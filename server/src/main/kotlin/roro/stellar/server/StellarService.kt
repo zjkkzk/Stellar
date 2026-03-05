@@ -29,6 +29,8 @@ import roro.stellar.server.shizuku.ShizukuCallbackFactory
 import roro.stellar.server.shizuku.ShizukuServiceIntercept
 import roro.stellar.server.userservice.UserServiceManager
 import roro.stellar.server.util.Logger
+import roro.stellar.server.daemon.DaemonManager
+import roro.stellar.server.daemon.DaemonManager.stopDaemon
 import kotlin.system.exitProcess
 
 class StellarService : IStellarService.Stub() {
@@ -43,6 +45,9 @@ class StellarService : IStellarService.Stub() {
     private val bridge: StellarCommunicationBridge
 
     internal val shizukuServiceIntercept: ShizukuServiceIntercept
+
+    @Volatile
+    private var daemonPid: Int = -1
 
     init {
         try {
@@ -114,6 +119,10 @@ class StellarService : IStellarService.Stub() {
                         ManagerGrantHelper.grantAccessibilityService()
                     }
                     FollowStellarStartupExt.schedule(configManager)
+                    if (configManager.isDaemonEnabled()) {
+                        startDaemon()
+                        LOGGER.i("已启动进程守护")
+                    }
                     notifyManagerServiceStarted()
                     LOGGER.i("Stellar 服务启动完成")
                 } catch (e: Throwable) {
@@ -306,10 +315,37 @@ class StellarService : IStellarService.Stub() {
         LOGGER.i("Shizuku 兼容层已%s", if (enabled) "启用" else "禁用")
     }
 
+    override fun isDaemonEnabled(): Boolean {
+        val caller = CallerContext.fromBinder()
+        permissionEnforcer.enforceManager(caller, "isDaemonEnabled")
+        return configManager.isDaemonEnabled()
+    }
+
+    override fun setDaemonEnabled(enabled: Boolean) {
+        val caller = CallerContext.fromBinder()
+        permissionEnforcer.enforceManager(caller, "setDaemonEnabled")
+        configManager.setDaemonEnabled(enabled)
+
+        if (enabled) {
+            startDaemon()
+        } else {
+            stopDaemon()
+            daemonPid = -1
+        }
+
+        LOGGER.i("进程守护已%s", if (enabled) "启用" else "禁用")
+    }
+
+    private fun stopDaemon() {
+        DaemonManager.stopDaemon()
+    }
+
     override fun exit() {
         val caller = CallerContext.fromBinder()
         permissionEnforcer.enforceManager(caller, "exit")
         LOGGER.i("exit")
+        daemonPid = -1
+        stopDaemon()
         exitProcess(0)
     }
 
@@ -475,6 +511,45 @@ class StellarService : IStellarService.Stub() {
             } catch (e: Throwable) {
                 LOGGER.w(e, "通知管理器服务启动失败")
             }
+        }
+    }
+
+    private fun startDaemon() {
+        try {
+            val myPid = android.os.Process.myPid()
+            val classpath = System.getProperty("java.class.path") ?: return
+            val startCmd = "CLASSPATH=$classpath app_process /system/bin --nice-name=stellar_server roro.stellar.server.StellarService &"
+            daemonPid = DaemonManager.startDaemon(myPid, startCmd)
+            if (daemonPid > 0) {
+                startDaemonMonitor()
+            }
+        } catch (e: Throwable) {
+            LOGGER.e(e, "启动守护进程失败")
+        }
+    }
+
+    private fun startDaemonMonitor() {
+        Thread {
+            while (configManager.isDaemonEnabled()) {
+                try {
+                    Thread.sleep(5000)
+                    if (daemonPid > 0 && !isProcessAlive(daemonPid)) {
+                        LOGGER.w("检测到守护进程死亡，重新启动")
+                        startDaemon()
+                        break
+                    }
+                } catch (e: Exception) {
+                    LOGGER.e(e, "守护进程监控错误")
+                }
+            }
+        }.start()
+    }
+
+    private fun isProcessAlive(pid: Int): Boolean {
+        return try {
+            java.io.File("/proc/$pid").exists()
+        } catch (e: Exception) {
+            false
         }
     }
 

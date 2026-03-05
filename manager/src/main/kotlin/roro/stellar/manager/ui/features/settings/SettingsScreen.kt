@@ -42,6 +42,7 @@ import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.SettingsEthernet
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.automirrored.filled.Subject
+import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
@@ -82,6 +83,7 @@ import roro.stellar.manager.BuildConfig
 import roro.stellar.manager.R
 import roro.stellar.manager.StellarSettings
 import roro.stellar.manager.StellarManagerProvider.Companion.KEY_SHIZUKU_COMPAT
+import roro.stellar.manager.StellarManagerProvider.Companion.KEY_DAEMON_ENABLED
 import roro.stellar.manager.StellarSettings.SHIZUKU_COMPAT_ENABLED
 import roro.stellar.manager.StellarSettings.TCPIP_PORT
 import roro.stellar.manager.StellarSettings.TCPIP_PORT_ENABLED
@@ -180,6 +182,10 @@ fun SettingsScreen(
 
     var dropPrivileges by remember {
         mutableStateOf(preferences.getBoolean(DROP_PRIVILEGES, false))
+    }
+
+    var daemonEnabled by remember {
+        mutableStateOf(preferences.getBoolean(StellarSettings.DAEMON_ENABLED, false))
     }
 
     var currentThemeMode by remember { mutableStateOf(ThemePreferences.themeMode.value) }
@@ -380,6 +386,34 @@ fun SettingsScreen(
                     onCheckedChange = { newValue ->
                         dropPrivileges = newValue
                         savePreference(DROP_PRIVILEGES, newValue)
+                    }
+                )
+            }
+
+            item {
+                SettingsSwitchCard(
+                    icon = Icons.Default.Replay,
+                    title = stringResource(R.string.daemon_enabled),
+                    subtitle = stringResource(R.string.daemon_enabled_subtitle),
+                    checked = daemonEnabled,
+                    onCheckedChange = { newValue ->
+                        daemonEnabled = newValue
+                        savePreference(StellarSettings.DAEMON_ENABLED, newValue)
+                        scope.launch {
+                            try {
+                                val db = AppDatabase.get(context)
+                                withContext(Dispatchers.IO) {
+                                    db.configDao().set(ConfigEntity(KEY_DAEMON_ENABLED, newValue.toString()))
+                                }
+                            } catch (_: Exception) {}
+                            try {
+                                @SuppressLint("RestrictedApi")
+                                withContext(Dispatchers.IO) {
+                                    Stellar.setDaemonEnabled(newValue)
+                                }
+                            } catch (_: Exception) {
+                            }
+                        }
                     }
                 )
             }

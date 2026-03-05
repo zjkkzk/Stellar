@@ -111,6 +111,8 @@
     <string name="setting_failed">Échec du paramétrage : %s</string>
     <string name="drop_privileges">Réduction des privilèges</string>
     <string name="drop_privileges_subtitle">Exécuter en tant qu\'utilisateur Shell après le démarrage Root</string>
+    <string name="daemon_enabled">Démon de processus</string>
+    <string name="daemon_enabled_subtitle">Surveillance mutuelle pour redémarrage automatique</string>
     <string name="tcpip_port">Port TCP/IP</string>
     <string name="tcpip_port_subtitle">Changer le port TCP/IP d\'adbd après le démarrage via le débogage sans fil</string>
     <string name="cannot_generate_safe_port">Impossible de générer un port sûr, veuillez le définir manuellement</string>

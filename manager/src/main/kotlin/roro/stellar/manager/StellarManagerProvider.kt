@@ -25,6 +25,7 @@ class StellarManagerProvider : StellarProvider() {
                     when (e.key) {
                         KEY_SHIZUKU_COMPAT -> config.shizukuCompatEnabled = e.value.toBoolean()
                         KEY_ACCESSIBILITY_AUTO_START -> config.accessibilityAutoStart = e.value.toBoolean()
+                        KEY_DAEMON_ENABLED -> config.daemonEnabled = e.value.toBoolean()
                         KEY_PACKAGES_JSON -> config.packages = GSON.fromJson(e.value,
                             object : TypeToken<MutableMap<Int, StellarConfig.PackageEntry>>() {}.type) ?: mutableMapOf()
                     }
@@ -37,6 +38,7 @@ class StellarManagerProvider : StellarProvider() {
                 db.configDao().setAll(listOf(
                     ConfigEntity(KEY_SHIZUKU_COMPAT, config.shizukuCompatEnabled.toString()),
                     ConfigEntity(KEY_ACCESSIBILITY_AUTO_START, config.accessibilityAutoStart.toString()),
+                    ConfigEntity(KEY_DAEMON_ENABLED, config.daemonEnabled.toString()),
                     ConfigEntity(KEY_PACKAGES_JSON, GSON.toJson(config.packages))
                 ))
                 return Bundle()
@@ -64,6 +66,7 @@ class StellarManagerProvider : StellarProvider() {
         const val METHOD_GET_SHIZUKU_COMPAT = "getShizukuCompat"
         const val KEY_SHIZUKU_COMPAT = "shizukuCompat"
         const val KEY_ACCESSIBILITY_AUTO_START = "accessibilityAutoStart"
+        const val KEY_DAEMON_ENABLED = "daemonEnabled"
         const val METHOD_LOAD_CONFIG = "loadConfig"
         const val METHOD_SAVE_CONFIG = "saveConfig"
         const val KEY_CONFIG_JSON = "configJson"

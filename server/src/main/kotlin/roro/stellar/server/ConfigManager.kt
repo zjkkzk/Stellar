@@ -307,6 +307,22 @@ class ConfigManager {
         }
     }
 
+    fun isDaemonEnabled(): Boolean {
+        synchronized(this) {
+            return config.daemonEnabled
+        }
+    }
+
+    fun setDaemonEnabled(enabled: Boolean) {
+        synchronized(this) {
+            if (config.daemonEnabled != enabled) {
+                config.daemonEnabled = enabled
+                LOGGER.i("进程守护状态已更改: %s", if (enabled) "启用" else "禁用")
+                scheduleWriteLocked()
+            }
+        }
+    }
+
     companion object {
         private val LOGGER: Logger = Logger("ConfigManager")
 

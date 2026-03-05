@@ -111,6 +111,8 @@
     <string name="setting_failed">Ошибка настройки: %s</string>
     <string name="drop_privileges">Понижение привилегий</string>
     <string name="drop_privileges_subtitle">Работать от пользователя Shell после запуска Root</string>
+    <string name="daemon_enabled">Демон процесса</string>
+    <string name="daemon_enabled_subtitle">Взаимный мониторинг для автоперезапуска</string>
     <string name="tcpip_port">Порт TCP/IP</string>
     <string name="tcpip_port_subtitle">Переключить порт TCP/IP adbd после запуска через беспроводную отладку</string>
     <string name="cannot_generate_safe_port">Не удалось сгенерировать безопасный порт, задайте вручную</string>

@@ -111,6 +111,8 @@
     <string name="setting_failed">设置失败: %s</string>
     <string name="drop_privileges">降权激活</string>
     <string name="drop_privileges_subtitle">Root 启动后降权到 Shell 用户运行</string>
+    <string name="daemon_enabled">进程守护</string>
+    <string name="daemon_enabled_subtitle">双进程互守，自动重启</string>
     <string name="tcpip_port">TCP/IP 端口</string>
     <string name="tcpip_port_subtitle">通过无线调试启动后，将 adbd 的 TCP/IP 端口切换到指定端口</string>
     <string name="cannot_generate_safe_port">无法生成安全端口，请手动设置</string>
