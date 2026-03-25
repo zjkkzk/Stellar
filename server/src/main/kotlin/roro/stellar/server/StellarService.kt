@@ -197,7 +197,13 @@ class StellarService : IStellarService.Stub() {
 
             val record = clientManager.findClient(requestUid, requestPid)
             if (onetime) {
-                record?.onetimeMap?.set(ShizukuApiConstants.PERMISSION_NAME, allowed)
+                if (record != null) {
+                    record.onetimeMap[ShizukuApiConstants.PERMISSION_NAME] = allowed
+                } else {
+                    clientManager.findClients(requestUid).forEach {
+                        it.onetimeMap[ShizukuApiConstants.PERMISSION_NAME] = allowed
+                    }
+                }
             } else {
                 val newFlag = if (allowed) ConfigManager.FLAG_GRANTED else ConfigManager.FLAG_DENIED
                 configManager.updatePermission(requestUid, ShizukuApiConstants.PERMISSION_NAME, newFlag)
@@ -205,7 +211,14 @@ class StellarService : IStellarService.Stub() {
             }
 
             if (!allowed) {
-                record?.lastDenyTimeMap?.set(ShizukuApiConstants.PERMISSION_NAME, System.currentTimeMillis())
+                val now = System.currentTimeMillis()
+                if (record != null) {
+                    record.lastDenyTimeMap[ShizukuApiConstants.PERMISSION_NAME] = now
+                } else {
+                    clientManager.findClients(requestUid).forEach {
+                        it.lastDenyTimeMap[ShizukuApiConstants.PERMISSION_NAME] = now
+                    }
+                }
             }
 
             shizukuServiceIntercept.notifyPermissionResult(requestUid, requestPid, requestCode, allowed)

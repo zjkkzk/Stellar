@@ -21,13 +21,23 @@ object ShizukuCompat {
 
     // Shizuku API 常量
     private const val BINDER_DESCRIPTOR = "moe.shizuku.server.IShizukuService"
-    private const val TRANSACTION_attachApplication = 17
-    private const val EXTRA_SERVER_UID = "moe.shizuku.privileged.api.intent.extra.SERVER_UID"
-    private const val EXTRA_SERVER_VERSION = "moe.shizuku.privileged.api.intent.extra.SERVER_VERSION"
-    private const val EXTRA_SERVER_SECONTEXT = "moe.shizuku.privileged.api.intent.extra.SERVER_SECONTEXT"
-    private const val EXTRA_API_VERSION = "moe.shizuku.privileged.api.intent.extra.API_VERSION"
-    private const val EXTRA_PACKAGE_NAME = "moe.shizuku.privileged.api.intent.extra.PACKAGE_NAME"
-    private const val EXTRA_ALLOWED = "moe.shizuku.privileged.api.intent.extra.ALLOWED"
+    private const val TRANSACTION_ATTACH_APPLICATION_V13 = 18
+    private const val TRANSACTION_ATTACH_APPLICATION_V11 = 14
+
+    private const val BIND_APPLICATION_SERVER_UID = "shizuku:attach-reply-uid"
+    private const val BIND_APPLICATION_SERVER_VERSION = "shizuku:attach-reply-version"
+    private const val BIND_APPLICATION_SERVER_SECONTEXT = "shizuku:attach-reply-secontext"
+    private const val REQUEST_PERMISSION_REPLY_ALLOWED = "shizuku:request-permission-reply-allowed"
+    private const val ATTACH_APPLICATION_API_VERSION = "shizuku:attach-api-version"
+    private const val ATTACH_APPLICATION_PACKAGE_NAME = "shizuku:attach-package-name"
+
+    // 兼容旧实现键名
+    private const val LEGACY_EXTRA_SERVER_UID = "moe.shizuku.privileged.api.intent.extra.SERVER_UID"
+    private const val LEGACY_EXTRA_SERVER_VERSION = "moe.shizuku.privileged.api.intent.extra.SERVER_VERSION"
+    private const val LEGACY_EXTRA_SERVER_SECONTEXT = "moe.shizuku.privileged.api.intent.extra.SERVER_SECONTEXT"
+    private const val LEGACY_EXTRA_API_VERSION = "moe.shizuku.privileged.api.intent.extra.API_VERSION"
+    private const val LEGACY_EXTRA_PACKAGE_NAME = "moe.shizuku.privileged.api.intent.extra.PACKAGE_NAME"
+    private const val LEGACY_EXTRA_ALLOWED = "moe.shizuku.privileged.api.intent.extra.ALLOWED"
 
     var binder: IBinder? = null
         private set
@@ -46,14 +56,26 @@ object ShizukuCompat {
     private val application = object : IShizukuApplication.Stub() {
         override fun bindApplication(data: Bundle?) {
             if (data == null) return
-            serverUid = data.getInt(EXTRA_SERVER_UID, -1)
-            serverVersion = data.getInt(EXTRA_SERVER_VERSION, -1)
-            serverContext = data.getString(EXTRA_SERVER_SECONTEXT)
-            notifyBinderReceived()
+            serverUid = data.getInt(
+                BIND_APPLICATION_SERVER_UID,
+                data.getInt(LEGACY_EXTRA_SERVER_UID, -1)
+            )
+            serverVersion = data.getInt(
+                BIND_APPLICATION_SERVER_VERSION,
+                data.getInt(LEGACY_EXTRA_SERVER_VERSION, -1)
+            )
+            serverContext = data.getString(BIND_APPLICATION_SERVER_SECONTEXT)
+                ?: data.getString(LEGACY_EXTRA_SERVER_SECONTEXT)
+            scheduleBinderReceived()
         }
 
         override fun dispatchRequestPermissionResult(requestCode: Int, data: Bundle?) {
-            val allowed = data?.getBoolean(EXTRA_ALLOWED, false) ?: false
+            val allowed = data?.let {
+                it.getBoolean(
+                    REQUEST_PERMISSION_REPLY_ALLOWED,
+                    it.getBoolean(LEGACY_EXTRA_ALLOWED, false)
+                )
+            } ?: false
             notifyPermissionResult(requestCode, allowed)
         }
 
@@ -71,6 +93,7 @@ object ShizukuCompat {
         if (binder === newBinder) return
 
         if (newBinder == null) {
+            binderReady = false
             binder = null
             service = null
             serverUid = -1
@@ -89,21 +112,27 @@ object ShizukuCompat {
             }
 
             try {
-                attachApplication(newBinder, packageName)
+                val attachedV13 = attachApplicationV13(newBinder, packageName)
+                val attached = attachedV13 || attachApplicationV11(newBinder, packageName)
+                if (!attached) {
+                    // pre-v11 客户端不会收到 bindApplication，仍需标记已连接
+                    scheduleBinderReceived()
+                }
             } catch (e: Throwable) {
                 Log.w(TAG, "attachApplication failed", e)
+                // 避免部分 ROM 上 attach 抛异常后一直无法进入 ready
+                scheduleBinderReceived()
             }
-
-            binderReady = true
-            notifyBinderReceived()
         }
     }
 
     @Throws(RemoteException::class)
-    private fun attachApplication(binder: IBinder, packageName: String?) {
+    private fun attachApplicationV13(binder: IBinder, packageName: String?): Boolean {
         val args = Bundle().apply {
-            putInt(EXTRA_API_VERSION, 13)
-            putString(EXTRA_PACKAGE_NAME, packageName)
+            putInt(ATTACH_APPLICATION_API_VERSION, 13)
+            putString(ATTACH_APPLICATION_PACKAGE_NAME, packageName)
+            putInt(LEGACY_EXTRA_API_VERSION, 13)
+            putString(LEGACY_EXTRA_PACKAGE_NAME, packageName)
         }
 
         val data = Parcel.obtain()
@@ -113,12 +142,35 @@ object ShizukuCompat {
             data.writeStrongBinder(application.asBinder())
             data.writeInt(1)
             args.writeToParcel(data, 0)
-            binder.transact(TRANSACTION_attachApplication, data, reply, 0)
+            val result = binder.transact(TRANSACTION_ATTACH_APPLICATION_V13, data, reply, 0)
             reply.readException()
+            return result
         } finally {
             reply.recycle()
             data.recycle()
         }
+    }
+
+    @Throws(RemoteException::class)
+    private fun attachApplicationV11(binder: IBinder, packageName: String?): Boolean {
+        val data = Parcel.obtain()
+        val reply = Parcel.obtain()
+        try {
+            data.writeInterfaceToken(BINDER_DESCRIPTOR)
+            data.writeStrongBinder(application.asBinder())
+            data.writeString(packageName)
+            val result = binder.transact(TRANSACTION_ATTACH_APPLICATION_V11, data, reply, 0)
+            reply.readException()
+            return result
+        } finally {
+            reply.recycle()
+            data.recycle()
+        }
+    }
+
+    private fun scheduleBinderReceived() {
+        binderReady = true
+        notifyBinderReceived()
     }
 
     private fun notifyBinderReceived() {

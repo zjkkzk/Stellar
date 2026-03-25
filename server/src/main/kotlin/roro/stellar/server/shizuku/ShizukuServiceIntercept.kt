@@ -351,17 +351,33 @@ class ShizukuServiceIntercept(
     }
 
     fun notifyPermissionResult(uid: Int, pid: Int, requestCode: Int, allowed: Boolean) {
-        val record = clientManager.findClient(uid, pid)
-        if (record?.shizukuApplication == null) {
-            Log.w(TAG, "notifyPermissionResult: 未找到 uid=$uid, pid=$pid 的客户端")
+        val exactRecord = clientManager.findClient(uid, pid)
+        if (exactRecord?.shizukuApplication != null) {
+            exactRecord.dispatchShizukuPermissionResult(
+                requestCode,
+                allowed,
+                callback.serviceUid,
+                callback.serviceVersion,
+                callback.serviceSeLinuxContext
+            )
             return
         }
-        record.dispatchShizukuPermissionResult(
-            requestCode,
-            allowed,
-            callback.serviceUid,
-            callback.serviceVersion,
-            callback.serviceSeLinuxContext
-        )
+
+        val uidRecords = clientManager.findClients(uid).filter { it.shizukuApplication != null }
+        if (uidRecords.isEmpty()) {
+            Log.w(TAG, "notifyPermissionResult: 未找到 uid=$uid, pid=$pid 的可用客户端")
+            return
+        }
+
+        Log.w(TAG, "notifyPermissionResult: 未命中 pid=$pid，回退为 uid=$uid 广播 ${uidRecords.size} 个客户端")
+        uidRecords.forEach { record ->
+            record.dispatchShizukuPermissionResult(
+                requestCode,
+                allowed,
+                callback.serviceUid,
+                callback.serviceVersion,
+                callback.serviceSeLinuxContext
+            )
+        }
     }
 }

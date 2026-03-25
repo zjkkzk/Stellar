@@ -61,8 +61,8 @@ object BinderDistributor {
         packageName: String?,
         userId: Int,
         retry: Boolean = true
-    ) {
-        sendBinderInternal(
+    ): Boolean {
+        return sendBinderInternal(
             packageName = packageName,
             userId = userId,
             providerSuffix = ".stellar",
@@ -77,19 +77,20 @@ object BinderDistributor {
     fun sendShizukuBinderToUserApp(
         shizukuIntercept: ShizukuServiceIntercept?,
         packageName: String?,
-        userId: Int
-    ) {
-        if (shizukuIntercept == null || packageName == null) return
+        userId: Int,
+        retry: Boolean = true
+    ): Boolean {
+        if (shizukuIntercept == null || packageName == null) return false
 
-        sendBinderInternal(
+        return sendBinderInternal(
             packageName = packageName,
             userId = userId,
             providerSuffix = ".shizuku",
             extraKey = ShizukuApiConstants.EXTRA_BINDER,
             binderContainer = moe.shizuku.api.BinderContainer(shizukuIntercept.asBinder()),
             logPrefix = "Shizuku ",
-            retry = false,
-            onRetry = null
+            retry = retry,
+            onRetry = { sendShizukuBinderToUserApp(shizukuIntercept, packageName, userId, false) }
         )
     }
 
@@ -102,8 +103,8 @@ object BinderDistributor {
         logPrefix: String,
         retry: Boolean,
         onRetry: (() -> Unit)?
-    ) {
-        if (packageName == null) return
+    ): Boolean {
+        if (packageName == null) return false
 
         try {
             DeviceIdleControllerApis.addPowerSaveTempWhitelistApp(
@@ -122,7 +123,7 @@ object BinderDistributor {
             provider = ActivityManagerApis.getContentProviderExternal(name, userId, token, name)
             if (provider == null) {
                 LOGGER.e("${logPrefix}provider 为 null %s %d", name, userId)
-                return
+                return false
             }
             if (!provider.asBinder().pingBinder()) {
                 LOGGER.e("${logPrefix}provider 已失效 %s %d", name, userId)
@@ -132,7 +133,7 @@ object BinderDistributor {
                     Thread.sleep(1000)
                     onRetry()
                 }
-                return
+                return false
             }
 
             val extra = Bundle()
@@ -141,11 +142,19 @@ object BinderDistributor {
             val reply = IContentProviderUtils.callCompat(provider, null, name, "sendBinder", null, extra)
             if (reply != null) {
                 LOGGER.i("已向用户 %d 中的应用 %s 发送 ${logPrefix}binder", userId, packageName)
+                return true
             } else {
                 LOGGER.w("向用户 %d 中的应用 %s 发送 ${logPrefix}binder 失败", userId, packageName)
+                if (retry && onRetry != null) {
+                    LOGGER.w("准备重试向用户 %d 中的应用 %s 发送 ${logPrefix}binder", userId, packageName)
+                    Thread.sleep(300)
+                    onRetry()
+                }
+                return false
             }
         } catch (tr: Throwable) {
             LOGGER.e(tr, "向用户 %d 中的应用 %s 发送 ${logPrefix}binder 失败", userId, packageName)
+            return false
         } finally {
             if (provider != null) {
                 try {
