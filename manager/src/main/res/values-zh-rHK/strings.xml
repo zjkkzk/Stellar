@@ -80,8 +80,10 @@
     <string name="select_all">全選</string>
 
     <!-- Settings Screen -->
-    <string name="theme">主題</string>
-    <string name="theme_subtitle">選擇應用的外觀主題</string>
+    <string name="personalization">個性化</string>
+    <string name="personalization_subtitle">調整應用個性化設定</string>
+    <string name="app_theme">應用主題</string>
+    <string name="default_start_page">預設啟動頁</string>
     <string name="boot_startup_options">開機啟動</string>
     <string name="boot_startup_options_subtitle">設定開機自啟動模式</string>
     <string name="boot_start_wireless">無線調試</string>
@@ -287,6 +289,21 @@
     <string name="boot_start_success">Stellar 服務已在開機時成功啟動</string>
     <string name="boot_start_failed">Stellar 開機啟動失敗: %s</string>
     <string name="boot_start_root_no_permission">Root 權限不可用，開機啟動失敗</string>
+
+    <!-- Boot ADB Start Worker -->
+    <string name="boot_start_channel_name">開機啟動</string>
+    <string name="boot_start_channel_description">開機時服務啟動的通知</string>
+    <string name="boot_start_notification_title">Stellar 開機啟動</string>
+    <string name="boot_start_waiting_wifi">等待 WiFi 連接…</string>
+    <string name="boot_start_enabling_wireless_adb">啟用無線調試…</string>
+    <string name="boot_start_discovering_port">發現 ADB 端口…</string>
+    <string name="boot_start_connecting">連接到 ADB 服務…</string>
+    <string name="boot_start_waiting_unlock">等待裝置解鎖…</string>
+    <string name="boot_start_retry">立即重試</string>
+    <string name="boot_start_port_not_found">未找到 ADB 端口，重試中…</string>
+    <string name="boot_start_connect_failed">ADB 連接失敗，重試中…</string>
+    <string name="boot_start_binder_timeout">服務啟動超時，重試中…</string>
+
     <string name="boot_script_install_success">開機腳本創建成功</string>
     <string name="boot_script_install_failed">創建開機腳本失敗: %s</string>
     <string name="boot_script_remove_success">開機腳本已移除</string>

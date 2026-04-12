@@ -80,8 +80,10 @@
     <string name="select_all">Tout sélectionner</string>
 
     <!-- Settings Screen -->
-    <string name="theme">Thème</string>
-    <string name="theme_subtitle">Choisir l\'apparence de l\'application</string>
+    <string name="personalization">Personnalisation</string>
+    <string name="personalization_subtitle">Ajuster les paramètres de personnalisation de l\'application</string>
+    <string name="app_theme">Thème de l\'application</string>
+    <string name="default_start_page">Page de démarrage par défaut</string>
     <string name="boot_startup_options">Démarrage au boot</string>
     <string name="boot_startup_options_subtitle">Configurer le mode de démarrage automatique au boot</string>
     <string name="boot_start_wireless">Débogage sans fil</string>
@@ -287,6 +289,21 @@
     <string name="boot_start_success">Le service Stellar a démarré avec succès au boot</string>
     <string name="boot_start_failed">Échec du démarrage au boot de Stellar : %s</string>
     <string name="boot_start_root_no_permission">Accès Root indisponible, échec du démarrage au boot</string>
+
+    <!-- Boot ADB Start Worker -->
+    <string name="boot_start_channel_name">Démarrage au boot</string>
+    <string name="boot_start_channel_description">Notifications pour le démarrage du service au boot</string>
+    <string name="boot_start_notification_title">Démarrage au boot de Stellar</string>
+    <string name="boot_start_waiting_wifi">En attente de connexion WiFi…</string>
+    <string name="boot_start_enabling_wireless_adb">Activation du débogage sans fil…</string>
+    <string name="boot_start_discovering_port">Découverte du port ADB…</string>
+    <string name="boot_start_connecting">Connexion au service ADB…</string>
+    <string name="boot_start_waiting_unlock">En attente du déverrouillage de l\'appareil…</string>
+    <string name="boot_start_retry">Réessayer maintenant</string>
+    <string name="boot_start_port_not_found">Port ADB introuvable, nouvelle tentative…</string>
+    <string name="boot_start_connect_failed">Échec de connexion ADB, nouvelle tentative…</string>
+    <string name="boot_start_binder_timeout">Délai de démarrage du service dépassé, nouvelle tentative…</string>
+
     <string name="boot_script_install_success">Script de démarrage créé avec succès</string>
     <string name="boot_script_install_failed">Échec de la création du script de démarrage : %s</string>
     <string name="boot_script_remove_success">Script de démarrage supprimé</string>

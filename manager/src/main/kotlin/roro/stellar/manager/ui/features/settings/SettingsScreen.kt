@@ -4,26 +4,24 @@ import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import androidx.core.net.toUri
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -34,15 +32,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.automirrored.filled.Subject
 import androidx.compose.material.icons.filled.FlashOn
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.SettingsEthernet
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.automirrored.filled.Subject
-import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
@@ -69,6 +67,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -77,50 +76,49 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.content.edit
+import androidx.core.net.toUri
+import com.topjohnwu.superuser.Shell
 import dev.jeziellago.compose.markdowntext.MarkdownText
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import roro.stellar.Stellar
 import roro.stellar.manager.BuildConfig
 import roro.stellar.manager.R
-import roro.stellar.manager.StellarSettings
-import roro.stellar.manager.StellarManagerProvider.Companion.KEY_SHIZUKU_COMPAT
 import roro.stellar.manager.StellarManagerProvider.Companion.KEY_DAEMON_ENABLED
+import roro.stellar.manager.StellarManagerProvider.Companion.KEY_SHIZUKU_COMPAT
+import roro.stellar.manager.StellarSettings
+import roro.stellar.manager.StellarSettings.DROP_PRIVILEGES
 import roro.stellar.manager.StellarSettings.SHIZUKU_COMPAT_ENABLED
 import roro.stellar.manager.StellarSettings.TCPIP_PORT
 import roro.stellar.manager.StellarSettings.TCPIP_PORT_ENABLED
-import roro.stellar.manager.StellarSettings.DROP_PRIVILEGES
+import roro.stellar.manager.compat.ClipboardUtils
+import roro.stellar.manager.db.AppDatabase
+import roro.stellar.manager.db.ConfigEntity
 import roro.stellar.manager.ktx.setComponentEnabled
 import roro.stellar.manager.receiver.BootCompleteReceiver
 import roro.stellar.manager.startup.boot.BootScriptManager
 import roro.stellar.manager.ui.components.IconContainer
 import roro.stellar.manager.ui.components.LocalScreenConfig
-import roro.stellar.manager.ui.components.StellarSegmentedSelector
-import roro.stellar.manager.ui.components.SettingsContentCard
-import roro.stellar.manager.ui.components.SettingsSwitchCard
 import roro.stellar.manager.ui.components.SettingsClickableCard
 import roro.stellar.manager.ui.components.SettingsExpandableCard
 import roro.stellar.manager.ui.components.SettingsInnerSwitchRow
-import roro.stellar.manager.db.AppDatabase
-import roro.stellar.manager.db.ConfigEntity
-import roro.stellar.manager.util.update.AppUpdate
-import roro.stellar.manager.util.update.ApkDownloader
-import roro.stellar.manager.util.update.DownloadState
-import roro.stellar.manager.util.update.UpdateSource
-import roro.stellar.manager.util.update.UpdateUtils
+import roro.stellar.manager.ui.components.SettingsSwitchCard
+import roro.stellar.manager.ui.components.StellarSegmentedSelector
 import roro.stellar.manager.ui.navigation.components.StandardLargeTopAppBar
 import roro.stellar.manager.ui.navigation.components.createTopAppBarScrollBehavior
 import roro.stellar.manager.ui.theme.AppShape
 import roro.stellar.manager.ui.theme.AppSpacing
+import roro.stellar.manager.ui.theme.StartPage
 import roro.stellar.manager.ui.theme.ThemeMode
 import roro.stellar.manager.ui.theme.ThemePreferences
-import roro.stellar.manager.compat.ClipboardUtils
 import roro.stellar.manager.util.EnvironmentUtils
 import roro.stellar.manager.util.PortBlacklistUtils
-import com.topjohnwu.superuser.Shell
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import roro.stellar.Stellar
-import java.io.BufferedReader
-import java.io.InputStreamReader
+import roro.stellar.manager.util.update.ApkDownloader
+import roro.stellar.manager.util.update.AppUpdate
+import roro.stellar.manager.util.update.DownloadState
+import roro.stellar.manager.util.update.UpdateSource
+import roro.stellar.manager.util.update.UpdateUtils
 
 private const val TAG = "SettingsScreen"
 
@@ -189,8 +187,10 @@ fun SettingsScreen(
     }
 
     var currentThemeMode by remember { mutableStateOf(ThemePreferences.themeMode.value) }
+    var currentStartPage by remember { mutableStateOf(ThemePreferences.startPage.value) }
 
     var bootOptionsExpanded by remember { mutableStateOf(false) }
+    var themeOptionsExpanded by remember { mutableStateOf(false) }
 
     var isCheckingUpdate by remember { mutableStateOf(false) }
     var pendingUpdate by remember { mutableStateOf<AppUpdate?>(null) }
@@ -255,17 +255,47 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(AppSpacing.cardSpacing)
         ) {
             item(span = { GridItemSpan(gridColumns) }) {
-                SettingsContentCard(
-                    icon = Icons.Default.DarkMode,
-                    title = stringResource(R.string.theme),
-                    subtitle = stringResource(R.string.theme_subtitle)
+                SettingsExpandableCard(
+                    icon = Icons.Default.Palette,
+                    title = stringResource(R.string.personalization),
+                    subtitle = stringResource(R.string.personalization_subtitle),
+                    expanded = themeOptionsExpanded,
+                    onExpandChange = { themeOptionsExpanded = it }
                 ) {
-                    ThemeSelectorWithAnimation(
-                        currentMode = currentThemeMode,
-                        onModeChange = { mode ->
+                    Text(
+                        text = stringResource(R.string.app_theme),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    val themeLabels = ThemeMode.entries.associateWith { stringResource(ThemePreferences.getThemeModeDisplayNameRes(it)) }
+                    StellarSegmentedSelector(
+                        items = ThemeMode.entries.toList(),
+                        selectedItem = currentThemeMode,
+                        onItemSelected = { mode ->
                             currentThemeMode = mode
                             ThemePreferences.setThemeMode(mode)
-                        }
+                        },
+                        itemLabel = { themeLabels[it] ?: "" }
+                    )
+
+                    Text(
+                        text = stringResource(R.string.default_start_page),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    val pageLabels = StartPage.entries.associateWith { stringResource(ThemePreferences.getStartPageDisplayNameRes(it)) }
+                    StellarSegmentedSelector(
+                        items = StartPage.entries.toList(),
+                        selectedItem = currentStartPage,
+                        onItemSelected = { page ->
+                            currentStartPage = page
+                            ThemePreferences.setStartPage(page)
+                        },
+                        itemLabel = { pageLabels[it] ?: "" }
                     )
                 }
             }
@@ -963,28 +993,10 @@ fun SettingsScreen(
     }
 }
 
-@Composable
-private fun ThemeSelectorWithAnimation(
-    currentMode: ThemeMode,
-    onModeChange: (ThemeMode) -> Unit
-) {
-    val labels = ThemeMode.entries.associateWith { stringResource(ThemePreferences.getThemeModeDisplayNameRes(it)) }
-    StellarSegmentedSelector(
-        items = ThemeMode.entries.toList(),
-        selectedItem = currentMode,
-        onItemSelected = onModeChange,
-        itemLabel = { labels[it] ?: "" }
-    )
-}
-
 private fun savePreference(key: String, value: Boolean) {
     StellarSettings.getPreferences().edit { putBoolean(key, value) }
 }
 
-/**
- * 切换开机启动模式，互斥三选一。
- * 切换前先清理旧模式的副作用，再应用新模式。
- */
 private fun applyBootMode(
     context: Context,
     componentName: ComponentName,
@@ -995,7 +1007,6 @@ private fun applyBootMode(
 ) {
     scope.launch(Dispatchers.IO) {
         try {
-            // 清理旧模式的 BootCompleteReceiver 状态
             when (currentMode) {
                 StellarSettings.BootMode.BROADCAST,
                 StellarSettings.BootMode.ACCESSIBILITY -> {
@@ -1003,7 +1014,6 @@ private fun applyBootMode(
                 }
                 StellarSettings.BootMode.SCRIPT, StellarSettings.BootMode.NONE -> Unit
             }
-            // 应用新模式
             when (newMode) {
                 StellarSettings.BootMode.BROADCAST,
                 StellarSettings.BootMode.ACCESSIBILITY -> {
@@ -1011,7 +1021,6 @@ private fun applyBootMode(
                 }
                 StellarSettings.BootMode.SCRIPT, StellarSettings.BootMode.NONE -> Unit
             }
-            // 同步 accessibilityAutoStart 字段供 server 端读取
             val accessibilityEnabled = newMode == StellarSettings.BootMode.ACCESSIBILITY
             AppDatabase.get(context).configDao().set(
                 ConfigEntity("accessibilityAutoStart", accessibilityEnabled.toString())
@@ -1020,43 +1029,6 @@ private fun applyBootMode(
             withContext(Dispatchers.Main) { onSuccess() }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to apply boot mode $newMode", e)
-        }
-    }
-}
-
-private fun executeAdbCommand(command: String): String {
-    val process = Stellar.newProcess(arrayOf("sh", "-c", command), null, null)
-    val reader = BufferedReader(InputStreamReader(process.inputStream))
-    val output = reader.readText().trim()
-    process.waitFor()
-    return output
-}
-
-private fun toggleAccessibilityServiceViaAdb(enable: Boolean) {
-    val serviceName = "roro.stellar.manager/.service.StellarAccessibilityService"
-
-    val currentServices = executeAdbCommand("settings get secure enabled_accessibility_services")
-    val services = currentServices
-        .split(":")
-        .map { it.trim() }
-        .filter { it.isNotEmpty() && it != "null" }
-        .toMutableSet()
-
-    if (enable) {
-        services.add(serviceName)
-        val newServices = services.joinToString(":")
-        executeAdbCommand("settings put secure enabled_accessibility_services \"$newServices\"")
-        executeAdbCommand("settings put secure accessibility_enabled 1")
-    } else {
-        services.remove(serviceName)
-        val newServices = services.joinToString(":")
-
-        if (newServices.isEmpty()) {
-            executeAdbCommand("settings put secure enabled_accessibility_services null")
-            executeAdbCommand("settings put secure accessibility_enabled 0")
-        } else {
-            executeAdbCommand("settings put secure enabled_accessibility_services \"$newServices\"")
-            executeAdbCommand("settings put secure accessibility_enabled 1")
         }
     }
 }

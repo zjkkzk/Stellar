@@ -80,8 +80,10 @@
     <string name="select_all">Seleccionar todo</string>
 
     <!-- Settings Screen -->
-    <string name="theme">Tema</string>
-    <string name="theme_subtitle">Elegir la apariencia de la aplicación</string>
+    <string name="personalization">Personalización</string>
+    <string name="personalization_subtitle">Ajustar la configuración de personalización de la aplicación</string>
+    <string name="app_theme">Tema de la aplicación</string>
+    <string name="default_start_page">Página de inicio predeterminada</string>
     <string name="boot_startup_options">Inicio al arrancar</string>
     <string name="boot_startup_options_subtitle">Configurar el modo de inicio automático al arrancar</string>
     <string name="boot_start_wireless">Depuración inalámbrica</string>
@@ -287,6 +289,21 @@
     <string name="boot_start_success">El servicio Stellar se inició correctamente al arrancar</string>
     <string name="boot_start_failed">Error en el inicio al arrancar de Stellar: %s</string>
     <string name="boot_start_root_no_permission">Acceso Root no disponible, error en el inicio al arrancar</string>
+
+    <!-- Boot ADB Start Worker -->
+    <string name="boot_start_channel_name">Inicio al arrancar</string>
+    <string name="boot_start_channel_description">Notificaciones para el inicio del servicio al arrancar</string>
+    <string name="boot_start_notification_title">Inicio al arrancar de Stellar</string>
+    <string name="boot_start_waiting_wifi">Esperando conexión WiFi…</string>
+    <string name="boot_start_enabling_wireless_adb">Habilitando depuración inalámbrica…</string>
+    <string name="boot_start_discovering_port">Descubriendo puerto ADB…</string>
+    <string name="boot_start_connecting">Conectando al servicio ADB…</string>
+    <string name="boot_start_waiting_unlock">Esperando desbloqueo del dispositivo…</string>
+    <string name="boot_start_retry">Reintentar ahora</string>
+    <string name="boot_start_port_not_found">Puerto ADB no encontrado, reintentando…</string>
+    <string name="boot_start_connect_failed">Error de conexión ADB, reintentando…</string>
+    <string name="boot_start_binder_timeout">Tiempo de espera del servicio agotado, reintentando…</string>
+
     <string name="boot_script_install_success">Script de arranque creado correctamente</string>
     <string name="boot_script_install_failed">Error al crear el script de arranque: %s</string>
     <string name="boot_script_remove_success">Script de arranque eliminado</string>

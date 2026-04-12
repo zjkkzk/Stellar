@@ -54,6 +54,7 @@ import roro.stellar.manager.ui.navigation.routes.MainScreen
 import roro.stellar.manager.ui.navigation.safePopBackStack
 import roro.stellar.manager.ui.theme.StellarTheme
 import roro.stellar.manager.ui.theme.ThemePreferences
+import roro.stellar.manager.ui.theme.StartPage
 
 class MainActivity : ComponentActivity() {
 
@@ -129,7 +130,20 @@ private fun MainScreenContent(
 ) {
     val topAppBarState = LocalTopAppBarState.current!!
     val navController = rememberNavController()
-    var selectedIndex by remember { androidx.compose.runtime.mutableIntStateOf(0) }
+
+    val startPage = remember { ThemePreferences.startPage.value }
+    val initialIndex = when (startPage) {
+        StartPage.HOME -> 0
+        StartPage.APPS -> 1
+        StartPage.TERMINAL -> 2
+    }
+    val startRoute = when (startPage) {
+        StartPage.HOME -> MainScreen.Home.route
+        StartPage.APPS -> MainScreen.Apps.route
+        StartPage.TERMINAL -> MainScreen.Terminal.route
+    }
+
+    var selectedIndex by remember { androidx.compose.runtime.mutableIntStateOf(initialIndex) }
 
     var lastBackPressTime by remember { mutableLongStateOf(0L) }
     val context = navController.context
@@ -172,7 +186,7 @@ private fun MainScreenContent(
     val navHostContent: @Composable (Modifier) -> Unit = { modifier ->
         NavHost(
             navController = navController,
-            startDestination = MainScreen.Home.route,
+            startDestination = startRoute,
             modifier = modifier,
             enterTransition = { fadeIn(animationSpec = tween(300)) },
             exitTransition = { fadeOut(animationSpec = tween(300)) },

@@ -80,8 +80,10 @@
     <string name="select_all">全选</string>
 
     <!-- Settings Screen -->
-    <string name="theme">主题</string>
-    <string name="theme_subtitle">选择应用的外观主题</string>
+    <string name="personalization">个性化</string>
+    <string name="personalization_subtitle">调整应用个性化设置</string>
+    <string name="app_theme">应用主题</string>
+    <string name="default_start_page">默认启动页</string>
     <string name="boot_startup_options">开机启动</string>
     <string name="boot_startup_options_subtitle">配置开机自启动模式</string>
     <string name="boot_start_wireless">无线调试</string>
@@ -290,17 +292,17 @@
 
     <!-- Boot ADB Start Worker -->
     <string name="boot_start_channel_name">开机启动</string>
-    <string name="boot_start_channel_description">开机自启动服务相关通知</string>
+    <string name="boot_start_channel_description">开机时服务启动的通知</string>
     <string name="boot_start_notification_title">Stellar 开机启动</string>
     <string name="boot_start_waiting_wifi">等待 WiFi 连接…</string>
-    <string name="boot_start_enabling_wireless_adb">正在启用无线调试…</string>
-    <string name="boot_start_discovering_port">正在发现 ADB 端口…</string>
-    <string name="boot_start_connecting">正在连接 ADB 服务…</string>
+    <string name="boot_start_enabling_wireless_adb">启用无线调试…</string>
+    <string name="boot_start_discovering_port">发现 ADB 端口…</string>
+    <string name="boot_start_connecting">连接到 ADB 服务…</string>
     <string name="boot_start_waiting_unlock">等待设备解锁…</string>
     <string name="boot_start_retry">立即重试</string>
-    <string name="boot_start_port_not_found">未找到 ADB 端口，正在重试…</string>
-    <string name="boot_start_connect_failed">ADB 连接失败，正在重试…</string>
-    <string name="boot_start_binder_timeout">服务启动超时，正在重试…</string>
+    <string name="boot_start_port_not_found">未找到 ADB 端口，重试中…</string>
+    <string name="boot_start_connect_failed">ADB 连接失败，重试中…</string>
+    <string name="boot_start_binder_timeout">服务启动超时，重试中…</string>
 
     <string name="boot_script_install_success">开机脚本创建成功</string>
     <string name="boot_script_install_failed">创建开机脚本失败: %s</string>

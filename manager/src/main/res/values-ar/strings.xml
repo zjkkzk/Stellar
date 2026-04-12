@@ -80,8 +80,10 @@
     <string name="select_all">تحديد الكل</string>
 
     <!-- Settings Screen -->
-    <string name="theme">المظهر</string>
-    <string name="theme_subtitle">اختيار مظهر التطبيق</string>
+    <string name="personalization">التخصيص</string>
+    <string name="personalization_subtitle">ضبط إعدادات تخصيص التطبيق</string>
+    <string name="app_theme">مظهر التطبيق</string>
+    <string name="default_start_page">صفحة البداية الافتراضية</string>
     <string name="boot_startup_options">التشغيل عند الإقلاع</string>
     <string name="boot_startup_options_subtitle">تكوين وضع التشغيل التلقائي عند الإقلاع</string>
     <string name="boot_start_wireless">التصحيح اللاسلكي</string>
@@ -287,6 +289,21 @@
     <string name="boot_start_success">تم تشغيل خدمة Stellar بنجاح عند الإقلاع</string>
     <string name="boot_start_failed">فشل التشغيل عند الإقلاع لـ Stellar: %s</string>
     <string name="boot_start_root_no_permission">صلاحية Root غير متاحة، فشل التشغيل عند الإقلاع</string>
+
+    <!-- Boot ADB Start Worker -->
+    <string name="boot_start_channel_name">التشغيل عند الإقلاع</string>
+    <string name="boot_start_channel_description">إشعارات بدء الخدمة عند الإقلاع</string>
+    <string name="boot_start_notification_title">تشغيل Stellar عند الإقلاع</string>
+    <string name="boot_start_waiting_wifi">في انتظار اتصال WiFi…</string>
+    <string name="boot_start_enabling_wireless_adb">تمكين التصحيح اللاسلكي…</string>
+    <string name="boot_start_discovering_port">اكتشاف منفذ ADB…</string>
+    <string name="boot_start_connecting">الاتصال بخدمة ADB…</string>
+    <string name="boot_start_waiting_unlock">في انتظار فتح قفل الجهاز…</string>
+    <string name="boot_start_retry">إعادة المحاولة الآن</string>
+    <string name="boot_start_port_not_found">لم يتم العثور على منفذ ADB، إعادة المحاولة…</string>
+    <string name="boot_start_connect_failed">فشل اتصال ADB، إعادة المحاولة…</string>
+    <string name="boot_start_binder_timeout">انتهت مهلة بدء الخدمة، إعادة المحاولة…</string>
+
     <string name="boot_script_install_success">تم إنشاء سكريبت الإقلاع بنجاح</string>
     <string name="boot_script_install_failed">فشل إنشاء سكريبت الإقلاع: %s</string>
     <string name="boot_script_remove_success">تم إزالة سكريبت الإقلاع</string>

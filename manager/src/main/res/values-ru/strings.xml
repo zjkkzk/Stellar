@@ -80,8 +80,10 @@
     <string name="select_all">Выбрать все</string>
 
     <!-- Settings Screen -->
-    <string name="theme">Тема</string>
-    <string name="theme_subtitle">Выбрать оформление приложения</string>
+    <string name="personalization">Персонализация</string>
+    <string name="personalization_subtitle">Настройка персонализации приложения</string>
+    <string name="app_theme">Тема приложения</string>
+    <string name="default_start_page">Стартовая страница по умолчанию</string>
     <string name="boot_startup_options">Автозапуск при загрузке</string>
     <string name="boot_startup_options_subtitle">Настройка режима автозапуска при загрузке</string>
     <string name="boot_start_wireless">Беспроводная отладка</string>
@@ -287,6 +289,21 @@
     <string name="boot_start_success">Сервис Stellar успешно запущен при загрузке</string>
     <string name="boot_start_failed">Ошибка автозапуска Stellar: %s</string>
     <string name="boot_start_root_no_permission">Root-доступ недоступен, автозапуск не удался</string>
+
+    <!-- Boot ADB Start Worker -->
+    <string name="boot_start_channel_name">Автозапуск при загрузке</string>
+    <string name="boot_start_channel_description">Уведомления о запуске сервиса при загрузке</string>
+    <string name="boot_start_notification_title">Автозапуск Stellar</string>
+    <string name="boot_start_waiting_wifi">Ожидание подключения WiFi…</string>
+    <string name="boot_start_enabling_wireless_adb">Включение беспроводной отладки…</string>
+    <string name="boot_start_discovering_port">Поиск порта ADB…</string>
+    <string name="boot_start_connecting">Подключение к сервису ADB…</string>
+    <string name="boot_start_waiting_unlock">Ожидание разблокировки устройства…</string>
+    <string name="boot_start_retry">Повторить сейчас</string>
+    <string name="boot_start_port_not_found">Порт ADB не найден, повтор…</string>
+    <string name="boot_start_connect_failed">Ошибка подключения ADB, повтор…</string>
+    <string name="boot_start_binder_timeout">Тайм-аут запуска сервиса, повтор…</string>
+
     <string name="boot_script_install_success">Скрипт загрузки успешно создан</string>
     <string name="boot_script_install_failed">Не удалось создать скрипт загрузки: %s</string>
     <string name="boot_script_remove_success">Скрипт загрузки удалён</string>

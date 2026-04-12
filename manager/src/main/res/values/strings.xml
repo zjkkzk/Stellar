@@ -82,8 +82,10 @@
     <string name="select_all">Select All</string>
 
     <!-- Settings Screen -->
-    <string name="theme">Theme</string>
-    <string name="theme_subtitle">Choose the app appearance</string>
+    <string name="personalization">Personalization</string>
+    <string name="personalization_subtitle">Adjust app personalization settings</string>
+    <string name="app_theme">App theme</string>
+    <string name="default_start_page">Default start page</string>
     <string name="boot_startup_options">Boot Startup</string>
     <string name="boot_startup_options_subtitle">Configure auto-start mode on boot</string>
     <string name="boot_start_wireless">Wireless Debugging</string>
@@ -135,7 +137,7 @@
     <string name="cannot_open_browser">Cannot open browser</string>
     <string name="check_update">Check for Updates</string>
     <string name="current_version">Current version: %s</string>
-    <string name="checking">Checking...</string>
+    <string name="checking">Checking…</string>
 
     <!-- Logs Screen -->
     <string name="service_not_running_toast">Service not running</string>
@@ -146,8 +148,8 @@
     <string name="logs_copied">Logs copied to clipboard</string>
     <string name="copy_logs">Copy Logs</string>
     <string name="clear_logs">Clear Logs</string>
-    <string name="search_logs">Search logs...</string>
-    <string name="search_apps">Search apps...</string>
+    <string name="search_logs">Search logs…</string>
+    <string name="search_apps">Search apps…</string>
     <string name="clear">Clear</string>
     <string name="no_logs">No Logs</string>
     <string name="logs_will_show">Logs will appear when the service is running</string>
@@ -171,7 +173,7 @@
     <string name="execution_result">Result</string>
     <string name="return_value">Exit code</string>
     <string name="time_elapsed">Duration</string>
-    <string name="executing_ellipsis">Running...</string>
+    <string name="executing_ellipsis">Running…</string>
     <string name="copy_all">Copy All</string>
 
     <!-- Starter Screen -->
@@ -204,7 +206,7 @@
     <string name="waiting_connect">Connecting</string>
     <string name="verify_connection">Verify Connection</string>
     <string name="waiting_verify">Verifying</string>
-    <string name="detecting_adb_port">Detecting available ADB port...</string>
+    <string name="detecting_adb_port">Detecting available ADB port…</string>
     <string name="port_available">Port %d available</string>
     <string name="already_paired">Paired</string>
     <string name="no_port_detected">No available port detected</string>
@@ -215,13 +217,13 @@
     <string name="pairing_instruction">Tap \"Pair device with pairing code\" in Wireless Debugging settings, then enter the code in the notification</string>
     <string name="connection_success">Connected</string>
     <string name="verification_passed">Verified</string>
-    <string name="checking_ellipsis">Checking...</string>
+    <string name="checking_ellipsis">Checking…</string>
     <string name="completed">Done</string>
-    <string name="starting_ellipsis">Starting...</string>
-    <string name="waiting_response">Waiting for response...</string>
+    <string name="starting_ellipsis">Starting…</string>
+    <string name="waiting_response">Waiting for response…</string>
     <string name="pairing_failed_retry">Pairing failed, please try again</string>
     <string name="need_pairing_to_connect">Pairing required to connect</string>
-    <string name="checking_root_permission">Checking root access...</string>
+    <string name="checking_root_permission">Checking root access…</string>
     <string name="root_permission_acquired">Root access granted</string>
     <string name="error_cannot_kill_process">Cannot terminate process, please stop the existing service from the app first</string>
     <string name="error_cannot_set_classpath">Cannot set CLASSPATH</string>
@@ -245,8 +247,8 @@
     <string name="command_output">Output:</string>
     <string name="error_info">Error:</string>
     <string name="log_copied">Log copied to clipboard</string>
-    <string name="connecting_ellipsis">Connecting...</string>
-    <string name="switching_port">Switching to user-configured port %d...</string>
+    <string name="connecting_ellipsis">Connecting…</string>
+    <string name="switching_port">Switching to user-configured port %d…</string>
     <string name="port_switch_failed">Port switch failed: %s</string>
     <string name="port_switched_to">Port switched to %d</string>
     <string name="pairing_complete">Pairing complete</string>
@@ -269,8 +271,8 @@
     <string name="pairing_alert_channel">Pairing Alert</string>
     <string name="searching_pairing_service">Searching for pairing service</string>
     <string name="pairing_success">Pairing successful</string>
-    <string name="searching_connect_service">Searching for connection service...</string>
-    <string name="pairing_failed_retrying">Pairing failed, retrying...</string>
+    <string name="searching_connect_service">Searching for connection service…</string>
+    <string name="pairing_failed_retrying">Pairing failed, retrying…</string>
     <string name="please_wait_auto_return">Please wait, returning to input screen</string>
     <string name="connect_service_not_found">Connection service not found</string>
     <string name="please_open_app_manually">Please open the app to start the service</string>
