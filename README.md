@@ -1,7 +1,7 @@
 <div align="center">
 
 # Stellar
-一个基于 Shizuku 的魔改分支，让应用通过 ADB 或 Root 权限使用系统级 API。
+一个基于 Shizuku 的魔改分支，让应用通过 ADB 或 Root 权限使用系统级 API。(本软件自始自终只有 Stellar一个名字，请勿给本软件乱取名)
 
 [![GitHub Stars](https://img.shields.io/github/stars/roro2239/Stellar?style=flat-square&logo=github&logoColor=white&color=181717&cacheSeconds=0)](https://github.com/roro2239/Stellar/stargazers)
 [![GitHub Forks](https://img.shields.io/github/forks/roro2239/Stellar?style=flat-square&logo=github&logoColor=white&color=181717)](https://github.com/roro2239/Stellar/forks)
