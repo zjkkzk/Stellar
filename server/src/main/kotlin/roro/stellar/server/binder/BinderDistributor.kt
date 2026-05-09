@@ -83,7 +83,21 @@ object BinderDistributor {
     }
 
     fun sendBinderToManager(binder: Binder?, userId: Int) {
-        sendBinderToUserApp(binder, MANAGER_APPLICATION_ID, userId)
+        sendBinderToManager(binder, userId, retry = true)
+    }
+
+    private fun sendBinderToManager(binder: Binder?, userId: Int, retry: Boolean): Boolean {
+        return sendBinderInternal(
+            packageName = MANAGER_APPLICATION_ID,
+            userId = userId,
+            providerSuffix = ".stellar",
+            extraKey = "roro.stellar.manager.intent.extra.BINDER",
+            binderContainer = BinderContainer(binder),
+            logPrefix = "",
+            retry = retry,
+            onRetry = { sendBinderToManager(binder, userId, retry = false) },
+            skipForceStopOnRetry = true
+        )
     }
 
     fun sendBinderToUserApp(
@@ -132,7 +146,8 @@ object BinderDistributor {
         binderContainer: Parcelable,
         logPrefix: String,
         retry: Boolean,
-        onRetry: (() -> Unit)?
+        onRetry: (() -> Unit)?,
+        skipForceStopOnRetry: Boolean = false
     ): Boolean {
         if (packageName == null) return false
 
@@ -158,8 +173,10 @@ object BinderDistributor {
             if (!provider.asBinder().pingBinder()) {
                 LOGGER.e("${logPrefix}provider 已失效 %s %d", name, userId)
                 if (retry && onRetry != null) {
-                    ActivityManagerApis.forceStopPackageNoThrow(packageName, userId)
-                    LOGGER.e("终止用户 %d 中的 %s 并重试", userId, packageName)
+                    if (!skipForceStopOnRetry) {
+                        ActivityManagerApis.forceStopPackageNoThrow(packageName, userId)
+                        LOGGER.e("终止用户 %d 中的 %s 并重试", userId, packageName)
+                    }
                     Thread.sleep(1000)
                     onRetry()
                 }

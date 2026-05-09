@@ -5,7 +5,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.RemoteException
 import android.text.TextUtils
-import androidx.annotation.RequiresApi
 import rikka.hidden.compat.ActivityManagerApis
 import rikka.hidden.compat.PackageManagerApis
 import rikka.hidden.compat.adapter.ProcessObserverAdapter
@@ -222,13 +221,21 @@ object BinderSender {
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     private class UidObserver : UidObserverAdapter() {
         @Throws(RemoteException::class)
         override fun onUidActive(uid: Int) {
             LOGGER.i("onUidActive: uid=%d", uid)
 
-            uidStarts(uid)
+            if (stellarService?.permissionEnforcer?.isManager(
+                roro.stellar.server.communication.CallerContext(uid, 0)
+            ) == true) {
+                LOGGER.i("检测到管理器 UID active，延迟 500ms 后发送 binder")
+                mainHandler.postDelayed({
+                    uidStarts(uid)
+                }, 500)
+            } else {
+                uidStarts(uid)
+            }
         }
 
         @Throws(RemoteException::class)
@@ -258,7 +265,7 @@ object BinderSender {
             ) == true) {
                 LOGGER.w("检测到管理器应用 UID gone，检查应用是否被卸载...")
                 mainHandler.postDelayed({
-                    val ai = PackageManagerApis.getApplicationInfoNoThrow(ServerConstants.MANAGER_APPLICATION_ID, 0, 0)
+                    val ai = PackageManagerApis.getApplicationInfoNoThrow(MANAGER_APPLICATION_ID, 0, 0)
                     if (ai == null) {
                         LOGGER.w("管理器应用已被卸载，正在退出...")
                         exitProcess(ServerConstants.MANAGER_APP_NOT_FOUND)
