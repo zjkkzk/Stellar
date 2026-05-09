@@ -10,6 +10,7 @@ import android.database.ContentObserver
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.Observer
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
@@ -74,6 +75,7 @@ class AdbStartWorker(
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.R)
     override suspend fun doWork(): Result {
         try {
             setForeground(createForegroundInfo(
@@ -161,6 +163,7 @@ class AdbStartWorker(
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.R)
     private suspend fun waitForAdbPort(cr: ContentResolver): Int = callbackFlow {
         setForegroundAsync(createForegroundInfo(
             applicationContext.getString(R.string.boot_start_discovering_port)
@@ -253,9 +256,17 @@ class AdbStartWorker(
     }
 
     private fun createForegroundInfo(message: String): ForegroundInfo {
-        return ForegroundInfo(
-            BootStartNotifications.NOTIFICATION_ID,
-            BootStartNotifications.buildStartingNotification(applicationContext, message)
-        )
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ForegroundInfo(
+                BootStartNotifications.NOTIFICATION_ID,
+                BootStartNotifications.buildStartingNotification(applicationContext, message),
+                android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+            )
+        } else {
+            ForegroundInfo(
+                BootStartNotifications.NOTIFICATION_ID,
+                BootStartNotifications.buildStartingNotification(applicationContext, message)
+            )
+        }
     }
 }
