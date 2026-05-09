@@ -38,6 +38,11 @@
     public static void main(java.lang.String[]);
 }
 
+# Keep StellarDaemon for app_process
+-keep class roro.stellar.server.daemon.StellarDaemon {
+    public static void main(java.lang.String[]);
+}
+
 # Keep Shizuku AIDL interfaces
 -keep class moe.shizuku.server.** { *; }
 -keep interface moe.shizuku.server.** { *; }
