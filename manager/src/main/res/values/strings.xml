@@ -139,6 +139,11 @@
     <string name="drop_privileges_subtitle">Run as shell user after root start</string>
     <string name="daemon_enabled">Process Daemon</string>
     <string name="daemon_enabled_subtitle">Mutual process monitoring for auto-restart</string>
+    <string name="add_to_home_screen">Add to Home</string>
+    <string name="add_to_home_screen_and_save">Add to Home and Save</string>
+    <string name="shortcut_not_supported">The current launcher does not support pinned shortcuts</string>
+    <string name="shortcut_command_not_found">The saved command no longer exists</string>
+    <string name="shortcut_command_started">Command started</string>
     <string name="hide_background">Hide in background</string>
     <string name="hide_background_subtitle">Hide Stellar from recent tasks</string>
     <string name="tcpip_port">TCP/IP Port</string>

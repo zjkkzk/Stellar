@@ -2,6 +2,7 @@
 <resources>
     <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar" />
     <style name="GrantPermissions" parent="Theme.Material3.DayNight.Dialog" />
+    <style name="ShortcutExecutor" parent="android:style/Theme.NoDisplay" />
 
     <style name="AppTheme.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">#FEF7FF</item>

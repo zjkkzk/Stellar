@@ -137,6 +137,11 @@
     <string name="drop_privileges_subtitle">Root 启动后降权到 Shell 用户运行</string>
     <string name="daemon_enabled">进程守护</string>
     <string name="daemon_enabled_subtitle">双进程互守，自动重启</string>
+    <string name="add_to_home_screen">添加到桌面</string>
+    <string name="add_to_home_screen_and_save">添加到桌面并保存</string>
+    <string name="shortcut_not_supported">当前桌面不支持固定快捷方式</string>
+    <string name="shortcut_command_not_found">预设命令已不存在</string>
+    <string name="shortcut_command_started">命令已开始执行</string>
     <string name="hide_background">隐藏后台</string>
     <string name="hide_background_subtitle">从最近任务中隐藏 Stellar</string>
     <string name="tcpip_port">TCP/IP 端口</string>

@@ -74,6 +74,13 @@
             android:name=".ui.features.manager.ManagerActivity"
             android:theme="@style/AppTheme" />
         <activity
+            android:name=".shortcut.CommandShortcutActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@style/ShortcutExecutor" />
+        <activity
             android:name=".authorization.RequestPermissionActivity"
             android:directBootAware="true"
             android:excludeFromRecents="true"
