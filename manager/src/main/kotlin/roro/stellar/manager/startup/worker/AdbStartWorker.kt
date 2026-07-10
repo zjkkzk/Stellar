@@ -6,6 +6,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.ServiceInfo
 import android.database.ContentObserver
 import android.os.Build
 import android.provider.Settings
@@ -256,16 +257,23 @@ class AdbStartWorker(
     }
 
     private fun createForegroundInfo(message: String): ForegroundInfo {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        val notification = BootStartNotifications.buildStartingNotification(applicationContext, message)
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             ForegroundInfo(
                 BootStartNotifications.NOTIFICATION_ID,
-                BootStartNotifications.buildStartingNotification(applicationContext, message),
-                android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+            )
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ForegroundInfo(
+                BootStartNotifications.NOTIFICATION_ID,
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
             )
         } else {
             ForegroundInfo(
                 BootStartNotifications.NOTIFICATION_ID,
-                BootStartNotifications.buildStartingNotification(applicationContext, message)
+                notification
             )
         }
     }
