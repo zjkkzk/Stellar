@@ -44,6 +44,7 @@ import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.SettingsEthernet
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.SystemUpdate
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -115,6 +116,7 @@ import roro.stellar.manager.ui.theme.StartPage
 import roro.stellar.manager.ui.theme.ThemeMode
 import roro.stellar.manager.ui.theme.ThemePreferences
 import roro.stellar.manager.util.EnvironmentUtils
+import roro.stellar.manager.util.BackgroundVisibilityUtils
 import roro.stellar.manager.util.PortBlacklistUtils
 import roro.stellar.manager.util.UserHandleCompat
 import roro.stellar.manager.util.update.ApkDownloader
@@ -204,6 +206,10 @@ fun SettingsScreen(
 
     var daemonEnabled by remember {
         mutableStateOf(preferences.getBoolean(StellarSettings.DAEMON_ENABLED, false))
+    }
+
+    var hideBackground by remember {
+        mutableStateOf(preferences.getBoolean(StellarSettings.HIDE_BACKGROUND, false))
     }
 
     var currentThemeMode by remember { mutableStateOf(ThemePreferences.themeMode.value) }
@@ -464,6 +470,20 @@ fun SettingsScreen(
                             } catch (_: Exception) {
                             }
                         }
+                    }
+                )
+            }
+
+            item {
+                SettingsSwitchCard(
+                    icon = Icons.Default.VisibilityOff,
+                    title = stringResource(R.string.hide_background),
+                    subtitle = stringResource(R.string.hide_background_subtitle),
+                    checked = hideBackground,
+                    onCheckedChange = { newValue ->
+                        hideBackground = newValue
+                        savePreference(StellarSettings.HIDE_BACKGROUND, newValue)
+                        BackgroundVisibilityUtils.setHidden(context, newValue)
                     }
                 )
             }

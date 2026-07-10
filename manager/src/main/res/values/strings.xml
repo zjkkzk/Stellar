@@ -139,6 +139,8 @@
     <string name="drop_privileges_subtitle">Run as shell user after root start</string>
     <string name="daemon_enabled">Process Daemon</string>
     <string name="daemon_enabled_subtitle">Mutual process monitoring for auto-restart</string>
+    <string name="hide_background">Hide in background</string>
+    <string name="hide_background_subtitle">Hide Stellar from recent tasks</string>
     <string name="tcpip_port">TCP/IP Port</string>
     <string name="tcpip_port_subtitle">Switch adbd TCP/IP port after starting via wireless debugging</string>
     <string name="cannot_generate_safe_port">Cannot generate a safe port, please set manually</string>

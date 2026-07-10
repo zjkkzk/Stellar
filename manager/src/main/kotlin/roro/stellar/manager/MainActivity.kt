@@ -59,6 +59,7 @@ import roro.stellar.manager.ui.navigation.safePopBackStack
 import roro.stellar.manager.ui.theme.StellarTheme
 import roro.stellar.manager.ui.theme.ThemePreferences
 import roro.stellar.manager.ui.theme.StartPage
+import roro.stellar.manager.util.BackgroundVisibilityUtils
 
 class MainActivity : ComponentActivity() {
 
@@ -92,6 +93,10 @@ class MainActivity : ComponentActivity() {
 
         pendingSourcePackage = savedInstanceState?.getString(STATE_SOURCE_PACKAGE)
         rememberSourceApp()
+        BackgroundVisibilityUtils.setHidden(
+            this,
+            StellarSettings.getPreferences().getBoolean(StellarSettings.HIDE_BACKGROUND, false)
+        )
         
         enableEdgeToEdge()
         
