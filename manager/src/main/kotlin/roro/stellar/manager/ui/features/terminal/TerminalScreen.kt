@@ -44,6 +44,7 @@ import roro.stellar.manager.ui.navigation.components.StandardLargeTopAppBar
 import roro.stellar.manager.ui.navigation.components.createTopAppBarScrollBehavior
 import roro.stellar.manager.ui.theme.AppShape
 import roro.stellar.manager.ui.theme.AppSpacing
+import roro.stellar.manager.shortcut.CommandShortcutManager
 import java.util.UUID
 import roro.stellar.manager.util.Logger.Companion.LOGGER
 
@@ -155,6 +156,17 @@ fun TerminalScreen(
                 commands = commands + newCommand
                 scope.launch { saveCommands(context, commands) }
                 showCreateDialog = false
+            },
+            onAddShortcut = { title, command, mode ->
+                val newCommand = CommandItem(
+                    title = title,
+                    command = command,
+                    mode = mode
+                )
+                commands = commands + newCommand
+                scope.launch { saveCommands(context, commands) }
+                CommandShortcutManager.requestPin(context, newCommand)
+                showCreateDialog = false
             }
         )
     }
@@ -168,6 +180,13 @@ fun TerminalScreen(
                     if (it.id == item.id) it.copy(title = title, command = command) else it
                 }
                 scope.launch { saveCommands(context, commands) }
+                editingCommand = null
+            },
+            onAddShortcut = { title, command ->
+                val updated = item.copy(title = title, command = command)
+                commands = commands.map { if (it.id == item.id) updated else it }
+                scope.launch { saveCommands(context, commands) }
+                CommandShortcutManager.requestPin(context, updated)
                 editingCommand = null
             }
         )
@@ -390,7 +409,8 @@ private fun AddCommandCard(onClick: () -> Unit) {
 @Composable
 private fun CreateCommandDialog(
     onDismiss: () -> Unit,
-    onConfirm: (String, String, CommandMode) -> Unit
+    onConfirm: (String, String, CommandMode) -> Unit,
+    onAddShortcut: (String, String, CommandMode) -> Unit
 ) {
     var selectedMode by remember { mutableStateOf(CommandMode.CLICK_EXECUTE) }
     var title by remember { mutableStateOf("") }
@@ -402,7 +422,17 @@ private fun CreateCommandDialog(
         confirmText = stringResource(R.string.save),
         confirmEnabled = command.isNotBlank(),
         onConfirm = { onConfirm(title.ifBlank { command.take(20) }, command, selectedMode) },
-        onDismiss = onDismiss
+        onDismiss = onDismiss,
+        leadingAction = {
+            TextButton(
+                enabled = command.isNotBlank(),
+                onClick = {
+                    onAddShortcut(title.ifBlank { command.take(20) }, command, selectedMode)
+                }
+            ) {
+                Text(stringResource(R.string.add_to_home_screen_and_save))
+            }
+        }
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.dialogContentSpacing)) {
             OutlinedTextField(
@@ -510,7 +540,8 @@ private fun ModeSelectionItem(
 private fun EditCommandDialog(
     item: CommandItem,
     onDismiss: () -> Unit,
-    onConfirm: (String, String) -> Unit
+    onConfirm: (String, String) -> Unit,
+    onAddShortcut: (String, String) -> Unit
 ) {
     var title by remember { mutableStateOf(item.title) }
     var command by remember { mutableStateOf(item.command) }
@@ -521,7 +552,15 @@ private fun EditCommandDialog(
         confirmText = stringResource(R.string.save),
         confirmEnabled = command.isNotBlank(),
         onConfirm = { onConfirm(title, command) },
-        onDismiss = onDismiss
+        onDismiss = onDismiss,
+        leadingAction = {
+            TextButton(
+                enabled = command.isNotBlank(),
+                onClick = { onAddShortcut(title.ifBlank { command.take(20) }, command) }
+            ) {
+                Text(stringResource(R.string.add_to_home_screen))
+            }
+        }
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.dialogContentSpacing)) {
             Surface(
@@ -615,7 +654,7 @@ private fun ExecutionResultDialog(
     terminalViewModel: TerminalViewModel
 ) {
     val result = state.result
-    val context = LocalContext.current
+    LocalContext.current
 
     BasicAlertDialog(
         onDismissRequest = { if (!state.isRunning) onDismiss() }

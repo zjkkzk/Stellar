@@ -139,6 +139,13 @@
     <string name="drop_privileges_subtitle">Run as shell user after root start</string>
     <string name="daemon_enabled">Process Daemon</string>
     <string name="daemon_enabled_subtitle">Mutual process monitoring for auto-restart</string>
+    <string name="add_to_home_screen">Add to Home</string>
+    <string name="add_to_home_screen_and_save">Add to Home and Save</string>
+    <string name="shortcut_not_supported">The current launcher does not support pinned shortcuts</string>
+    <string name="shortcut_command_not_found">The saved command no longer exists</string>
+    <string name="shortcut_command_started">Command started</string>
+    <string name="hide_background">Hide in background</string>
+    <string name="hide_background_subtitle">Hide Stellar from recent tasks</string>
     <string name="tcpip_port">TCP/IP Port</string>
     <string name="tcpip_port_subtitle">Switch adbd TCP/IP port after starting via wireless debugging</string>
     <string name="cannot_generate_safe_port">Cannot generate a safe port, please set manually</string>
@@ -284,6 +291,9 @@
     <string name="permission_use_generic"> to use %s?</string>
     <string name="always_allow">Always Allow</string>
     <string name="allow_once">Allow Once</string>
+    <string name="allow_and_return_to_source_app">Allow and return to %1$s</string>
+    <string name="allow_once_and_return_to_source_app">Allow once and return to %1$s</string>
+    <string name="cannot_open_source_app">Unable to open the source app</string>
     <string name="deny">Deny</string>
     <string name="deny_and_dont_ask">Deny and Don\'t Ask Again</string>
 

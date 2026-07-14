@@ -137,6 +137,13 @@
     <string name="drop_privileges_subtitle">Root 启动后降权到 Shell 用户运行</string>
     <string name="daemon_enabled">进程守护</string>
     <string name="daemon_enabled_subtitle">双进程互守，自动重启</string>
+    <string name="add_to_home_screen">添加到桌面</string>
+    <string name="add_to_home_screen_and_save">添加到桌面并保存</string>
+    <string name="shortcut_not_supported">当前桌面不支持固定快捷方式</string>
+    <string name="shortcut_command_not_found">预设命令已不存在</string>
+    <string name="shortcut_command_started">命令已开始执行</string>
+    <string name="hide_background">隐藏后台</string>
+    <string name="hide_background_subtitle">从最近任务中隐藏 Stellar</string>
     <string name="tcpip_port">TCP/IP 端口</string>
     <string name="tcpip_port_subtitle">通过无线调试启动后，将 adbd 的 TCP/IP 端口切换到指定端口</string>
     <string name="cannot_generate_safe_port">无法生成安全端口，请手动设置</string>
@@ -282,6 +289,9 @@
     <string name="permission_use_generic"> 使用 %s 吗？</string>
     <string name="always_allow">始终允许</string>
     <string name="allow_once">仅此一次</string>
+    <string name="allow_and_return_to_source_app">允许并返回%1$s</string>
+    <string name="allow_once_and_return_to_source_app">仅此一次并返回%1$s</string>
+    <string name="cannot_open_source_app">无法打开来源应用</string>
     <string name="deny">拒绝</string>
     <string name="deny_and_dont_ask">拒绝且不再询问</string>
 

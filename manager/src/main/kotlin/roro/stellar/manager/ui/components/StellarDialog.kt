@@ -1,8 +1,8 @@
 package roro.stellar.manager.ui.components
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -38,6 +38,7 @@ fun StellarDialog(
     onDismiss: () -> Unit = onDismissRequest,
     confirmEnabled: Boolean = true,
     showDismissButton: Boolean = true,
+    leadingAction: (@Composable RowScope.() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
     BasicAlertDialog(
@@ -72,9 +73,10 @@ fun StellarDialog(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    leadingAction?.invoke(this)
+                    Spacer(modifier = Modifier.weight(1f))
                     if (showDismissButton) {
                         TextButton(onClick = onDismiss) {
                             Text(dismissText)
