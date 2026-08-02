@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name" translatable="false">Stellar</string>
+
     <!-- Navigation -->
     <string name="nav_home">Inicio</string>
     <string name="nav_apps">Aplicaciones</string>
@@ -9,9 +11,9 @@
     <!-- Common -->
     <string name="confirm">Aceptar</string>
     <string name="cancel">Cancelar</string>
+    <string name="close">Cerrar</string>
     <string name="back">Atrás</string>
     <string name="copy">Copiar</string>
-    <string name="close">Cerrar</string>
     <string name="save">Guardar</string>
     <string name="retry">Reintentar</string>
     <string name="refresh">Actualizar</string>
@@ -27,9 +29,6 @@
     <string name="no_root_permission">Sin acceso Root</string>
     <string name="copied_to_clipboard">Copiado al portapapeles</string>
     <string name="copy_failed">Error al copiar</string>
-    <string name="ip_port_copied">%s copiado al portapapeles</string>
-    <string name="no_ip_available">No se puede obtener la dirección IP</string>
-    <string name="tcpip_port_not_configured">Puerto TCP/IP no configurado</string>
 
     <!-- Theme -->
     <string name="theme_light">Claro</string>
@@ -48,8 +47,32 @@
     <string name="root_start_subtitle">Iniciar el servicio Stellar mediante Root</string>
     <string name="wireless_debugging">Depuración inalámbrica</string>
     <string name="wireless_debugging_subtitle">Iniciar el servicio Stellar mediante depuración inalámbrica</string>
+    <string name="ip_port_copied">%s copiado al portapapeles</string>
+    <string name="no_ip_available">No se puede obtener la dirección IP</string>
+    <string name="tcpip_port_not_configured">Puerto TCP/IP no configurado</string>
     <string name="wired_adb">ADB por cable</string>
     <string name="wired_adb_subtitle">Iniciar el servicio Stellar mediante ADB</string>
+    <string name="adb_restricted_hint_title">Permiso ADB restringido</string>
+    <string name="adb_restricted_hint_message">La ejecución ADB actual está restringida por el sistema. Algunas funciones de API podrían no funcionar correctamente.</string>
+    <string name="adb_restricted_features_title">Funciones limitadas</string>
+    <string name="adb_restricted_features_message">Estos resultados proceden de comprobaciones no destructivas en el entorno actual del servicio.</string>
+    <string name="no_restricted_features">No se detectaron funciones restringidas</string>
+    <string name="feature_status_available">Disponible</string>
+    <string name="feature_status_restricted">Restringido</string>
+    <string name="feature_follow_service_command">Comandos de seguimiento del servicio</string>
+    <string name="feature_terminal_command">Comandos de terminal</string>
+    <string name="feature_shell_id_command">Comando: id</string>
+    <string name="feature_property_read_command">Comando: getprop</string>
+    <string name="feature_settings_read_command">Comando: settings get</string>
+    <string name="feature_package_list_command">Comando: cmd package</string>
+    <string name="feature_service_list_command">Comando: service list</string>
+    <string name="feature_process_list_command">Comando: ps -A</string>
+    <string name="feature_filesystem_read_command">Comando: ls /system/bin</string>
+    <string name="feature_selinux_status_command">Comando: getenforce</string>
+    <string name="feature_appops_manage">Gestión de AppOps</string>
+    <string name="feature_runtime_permission_manage">Concesión/revocación de permisos</string>
+    <string name="feature_secure_settings_write">Escritura en ajustes seguros</string>
+    <string name="feature_boot_adb_start">Inicio de ADB al arrancar</string>
     <string name="view">Ver</string>
     <string name="stop_service">Detener servicio</string>
     <string name="stop_service_message">El servicio Stellar se detendrá.</string>
@@ -86,12 +109,20 @@
     <string name="default_start_page">Página de inicio predeterminada</string>
     <string name="boot_startup_options">Inicio al arrancar</string>
     <string name="boot_startup_options_subtitle">Configurar el modo de inicio automático al arrancar</string>
+    <string name="boot_start_mode">Modo de inicio</string>
+    <string name="boot_start_mode_off_label">Apagado</string>
+    <string name="boot_start_mode_broadcast_label">Difusión</string>
+    <string name="boot_start_mode_prewarm_label">Preparar</string>
+    <string name="boot_start_mode_script_label">Root</string>
+    <string name="boot_start_none_subtitle">No ejecutar ninguna acción al arrancar</string>
     <string name="boot_start_wireless">Depuración inalámbrica</string>
     <string name="boot_start_wireless_subtitle">Iniciar mediante depuración inalámbrica al arrancar</string>
     <string name="boot_start_root">Root</string>
     <string name="boot_start_root_subtitle">Iniciar mediante Root al arrancar</string>
     <string name="boot_start_callback_mode">Difusión de arranque</string>
     <string name="boot_start_callback_mode_subtitle">Inicio automático al arrancar mediante difusión del sistema</string>
+    <string name="boot_start_tcpip_prewarm_subtitle">Esperar WiFi al arrancar, preparar el puerto ADB TCP/IP y desconectar sin iniciar Stellar para poder iniciar Stellar luego sin WiFi</string>
+    <string name="boot_start_adb_unavailable">Las acciones ADB al arrancar no están disponibles con los permisos o el perfil de usuario actuales</string>
     <string name="boot_start_script_mode">Script de arranque</string>
     <string name="boot_start_script_mode_subtitle">Inicio automático al arrancar mediante script Root</string>
     <string name="boot_start_script_mode_subtitle_no_root">Requiere acceso Root</string>
@@ -111,11 +142,19 @@
     <string name="shizuku_compat_layer_subtitle">Permitir que las aplicaciones Shizuku funcionen a través de Stellar</string>
     <string name="shizuku_compat_enabled">Compatibilidad con Shizuku activada</string>
     <string name="shizuku_compat_disabled">Compatibilidad con Shizuku desactivada</string>
+    <string name="shizuku_compat_disabled_badge">Desactivada</string>
     <string name="setting_failed">Error en la configuración: %s</string>
     <string name="drop_privileges">Reducir privilegios</string>
     <string name="drop_privileges_subtitle">Ejecutar como usuario Shell tras el inicio Root</string>
     <string name="daemon_enabled">Demonio de proceso</string>
     <string name="daemon_enabled_subtitle">Monitoreo mutuo para reinicio automático</string>
+    <string name="add_to_home_screen">Añadir a inicio</string>
+    <string name="add_to_home_screen_and_save">Añadir a inicio y guardar</string>
+    <string name="shortcut_not_supported">El lanzador actual no admite accesos directos fijados</string>
+    <string name="shortcut_command_not_found">El comando guardado ya no existe</string>
+    <string name="shortcut_command_started">Comando iniciado</string>
+    <string name="hide_background">Ocultar en segundo plano</string>
+    <string name="hide_background_subtitle">Ocultar Stellar de las apps recientes</string>
     <string name="tcpip_port">Puerto TCP/IP</string>
     <string name="tcpip_port_subtitle">Cambiar el puerto TCP/IP de adbd tras iniciar mediante depuración inalámbrica</string>
     <string name="cannot_generate_safe_port">No se pudo generar un puerto seguro, configúrelo manualmente</string>
@@ -255,12 +294,15 @@
 
     <!-- Permission Request -->
     <string name="permission_request">Solicitud de permiso</string>
-    <string name="permission_allow_prefix">¿Permitir a </string>
-    <string name="permission_use_stellar"> usar Stellar?</string>
-    <string name="permission_follow_startup"> iniciarse con Stellar cada vez?</string>
-    <string name="permission_use_generic"> usar %s?</string>
+    <string name="permission_allow_prefix">¿Permitir a\u0020</string>
+    <string name="permission_use_stellar">\u0020usar Stellar?</string>
+    <string name="permission_follow_startup">\u0020iniciarse con Stellar cada vez?</string>
+    <string name="permission_use_generic">\u0020usar %s?</string>
     <string name="always_allow">Permitir siempre</string>
     <string name="allow_once">Permitir una vez</string>
+    <string name="allow_and_return_to_source_app">Permitir y volver a %1$s</string>
+    <string name="allow_once_and_return_to_source_app">Permitir una vez y volver a %1$s</string>
+    <string name="cannot_open_source_app">No se pudo abrir la app de origen</string>
     <string name="deny">Denegar</string>
     <string name="deny_and_dont_ask">Denegar y no volver a preguntar</string>
 
@@ -298,12 +340,14 @@
     <string name="boot_start_notification_title">Inicio al arrancar de Stellar</string>
     <string name="boot_start_waiting_wifi">Esperando conexión WiFi…</string>
     <string name="boot_start_enabling_wireless_adb">Habilitando depuración inalámbrica…</string>
+    <string name="boot_start_preparing_tcpip">Preparando ADB TCP/IP…</string>
     <string name="boot_start_discovering_port">Descubriendo puerto ADB…</string>
     <string name="boot_start_connecting">Conectando al servicio ADB…</string>
     <string name="boot_start_waiting_unlock">Esperando desbloqueo del dispositivo…</string>
     <string name="boot_start_retry">Reintentar ahora</string>
     <string name="boot_start_port_not_found">Puerto ADB no encontrado, reintentando…</string>
     <string name="boot_start_connect_failed">Error de conexión ADB, reintentando…</string>
+    <string name="boot_start_prepare_tcpip_failed">Error al preparar ADB TCP/IP, reintentando…</string>
     <string name="boot_start_binder_timeout">Tiempo de espera del servicio agotado, reintentando…</string>
 
     <string name="boot_script_install_success">Script de arranque creado correctamente</string>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Stellar</string>
+    <string name="app_name">Stellar</string>
 
     <!-- Navigation -->
     <string name="nav_home">Start</string>
@@ -109,12 +109,20 @@
     <string name="default_start_page">Default start page</string>
     <string name="boot_startup_options">Boot Startup</string>
     <string name="boot_startup_options_subtitle">Configure auto-start mode on boot</string>
+    <string name="boot_start_mode">Startup mode</string>
+    <string name="boot_start_mode_off_label">Off</string>
+    <string name="boot_start_mode_broadcast_label">Broadcast</string>
+    <string name="boot_start_mode_prewarm_label">Prewarm</string>
+    <string name="boot_start_mode_script_label">Root</string>
+    <string name="boot_start_none_subtitle">Do not run any boot action</string>
     <string name="boot_start_wireless">Wireless Debugging</string>
     <string name="boot_start_wireless_subtitle">Start via wireless debugging on boot</string>
     <string name="boot_start_root">Root</string>
     <string name="boot_start_root_subtitle">Start via root on boot</string>
     <string name="boot_start_callback_mode">Boot Broadcast</string>
     <string name="boot_start_callback_mode_subtitle">Auto-start on boot via system broadcast</string>
+    <string name="boot_start_tcpip_prewarm_subtitle">Wait for WiFi on boot, prepare the ADB TCP/IP port, then disconnect without starting Stellar, so Stellar can start later without WiFi</string>
+    <string name="boot_start_adb_unavailable">ADB boot actions are unavailable with the current permissions or user profile</string>
     <string name="boot_start_script_mode">Boot Script</string>
     <string name="boot_start_script_mode_subtitle">Auto-start on boot via root script</string>
     <string name="boot_start_script_mode_subtitle_no_root">Requires root access</string>
@@ -134,9 +142,12 @@
     <string name="shizuku_compat_layer_subtitle">Allow Shizuku apps to run through Stellar</string>
     <string name="shizuku_compat_enabled">Shizuku compatibility enabled</string>
     <string name="shizuku_compat_disabled">Shizuku compatibility disabled</string>
+    <string name="shizuku_compat_disabled_badge">Disabled</string>
     <string name="setting_failed">Setting failed: %s</string>
     <string name="drop_privileges">Drop Privileges</string>
     <string name="drop_privileges_subtitle">Run as shell user after root start</string>
+    <string name="wireless_debugging_su">Wireless Debugging su Elevation</string>
+    <string name="wireless_debugging_su_subtitle">Try to start the service with su over wireless debugging</string>
     <string name="daemon_enabled">Process Daemon</string>
     <string name="daemon_enabled_subtitle">Mutual process monitoring for auto-restart</string>
     <string name="add_to_home_screen">Add to Home</string>
@@ -187,6 +198,11 @@
     <string name="mode_click_execute_desc">Tap to run commands manually</string>
     <string name="mode_follow_service">Service Startup</string>
     <string name="mode_follow_service_desc">Run automatically when service starts</string>
+    <string name="mode_follow_service_once">Run Limited Times with Service</string>
+    <string name="mode_follow_service_once_desc">Run a selected number of times when the service starts</string>
+    <string name="command_max_executions">Maximum executions</string>
+    <string name="command_enabled">Enabled</string>
+    <string name="command_execution_count">Total %1$d/%2$d (success %3$d, failed %4$d)</string>
     <string name="command">Commands</string>
     <string name="quick_execute">Quick Run</string>
     <string name="add_command">Add Command</string>
@@ -285,10 +301,10 @@
 
     <!-- Permission Request -->
     <string name="permission_request">Permission Request</string>
-    <string name="permission_allow_prefix">Allow </string>
-    <string name="permission_use_stellar"> to use Stellar?</string>
-    <string name="permission_follow_startup"> to start with Stellar every time?</string>
-    <string name="permission_use_generic"> to use %s?</string>
+    <string name="permission_allow_prefix">Allow\u0020</string>
+    <string name="permission_use_stellar">\u0020to use Stellar?</string>
+    <string name="permission_follow_startup">\u0020to start with Stellar every time?</string>
+    <string name="permission_use_generic">\u0020to use %s?</string>
     <string name="always_allow">Always Allow</string>
     <string name="allow_once">Allow Once</string>
     <string name="allow_and_return_to_source_app">Allow and return to %1$s</string>
@@ -331,12 +347,14 @@
     <string name="boot_start_notification_title">Stellar Boot Start</string>
     <string name="boot_start_waiting_wifi">Waiting for WiFi connection…</string>
     <string name="boot_start_enabling_wireless_adb">Enabling wireless debugging…</string>
+    <string name="boot_start_preparing_tcpip">Preparing ADB TCP/IP…</string>
     <string name="boot_start_discovering_port">Discovering ADB port…</string>
     <string name="boot_start_connecting">Connecting to ADB service…</string>
     <string name="boot_start_waiting_unlock">Waiting for device unlock…</string>
     <string name="boot_start_retry">Retry Now</string>
     <string name="boot_start_port_not_found">ADB port not found, retrying…</string>
     <string name="boot_start_connect_failed">ADB connection failed, retrying…</string>
+    <string name="boot_start_prepare_tcpip_failed">ADB TCP/IP preparation failed, retrying…</string>
     <string name="boot_start_binder_timeout">Service start timed out, retrying…</string>
 
     <string name="boot_script_install_success">Boot script created successfully</string>

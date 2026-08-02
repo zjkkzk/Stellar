@@ -152,7 +152,7 @@ class AdbWirelessHelper {
                         client.connect()
                         Log.i(AppConstants.TAG, "ADB已连接到${host}:${port}。正在执行启动命令...")
 
-                        client.shellCommand(Starter.internalCommand) { output ->
+                        client.shellCommand(Starter.wirelessDebuggingCommand) { output ->
                             val outputString = String(output)
                             onOutput(outputString)
                             Log.d(AppConstants.TAG, "Stellar启动输出片段: $outputString")

@@ -1,6 +1,8 @@
 package roro.stellar.manager.ui.features.apps
 
 import android.annotation.SuppressLint
+import android.content.SharedPreferences
+import android.content.pm.PackageInfo
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
@@ -14,11 +16,13 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -57,6 +61,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -88,7 +93,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import roro.stellar.Stellar
+import roro.stellar.StellarApiConstants
 import roro.stellar.manager.R
+import roro.stellar.manager.StellarSettings
 import roro.stellar.manager.authorization.AuthorizationManager
 import roro.stellar.manager.common.state.Status
 import roro.stellar.manager.compat.ClipboardUtils
@@ -107,6 +114,39 @@ import roro.stellar.manager.util.PinyinUtils
 import roro.stellar.manager.util.StellarSystemApis
 import roro.stellar.manager.util.UserHandleCompat
 
+private fun PackageInfo.supportsFollowStartup(): Boolean {
+    val declaredPermissions = applicationInfo?.metaData
+        ?.getString(StellarApiConstants.PERMISSION_KEY, "")
+        .orEmpty()
+
+    return declaredPermissions
+        .split(",")
+        .map { it.trim() }
+        .any { it == StellarApiConstants.PERMISSION_FOLLOW_STARTUP }
+}
+
+@Composable
+private fun rememberShizukuCompatEnabled(): Boolean {
+    val preferences = remember { StellarSettings.getPreferences() }
+    var enabled by remember {
+        mutableStateOf(preferences.getBoolean(StellarSettings.SHIZUKU_COMPAT_ENABLED, true))
+    }
+
+    DisposableEffect(preferences) {
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
+            if (key == StellarSettings.SHIZUKU_COMPAT_ENABLED) {
+                enabled = sharedPreferences.getBoolean(key, true)
+            }
+        }
+        preferences.registerOnSharedPreferenceChangeListener(listener)
+        onDispose {
+            preferences.unregisterOnSharedPreferenceChangeListener(listener)
+        }
+    }
+
+    return enabled
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppsScreen(
@@ -123,6 +163,7 @@ fun AppsScreen(
     val gridColumns = screenConfig.gridColumns
     val context = LocalContext.current
     val pm = context.packageManager
+    val shizukuCompatEnabled = rememberShizukuCompatEnabled()
 
     var isSearching by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
@@ -387,6 +428,7 @@ fun AppsScreen(
                                 val appInfo = stellarApps[index]
                                 AppListItem(
                                     appInfo = appInfo,
+                                    shizukuCompatEnabled = shizukuCompatEnabled,
                                     refreshTrigger = refreshTrigger,
                                     isSelectionMode = isSelectionMode,
                                     isSelected = selectedApps.contains(appInfo.packageInfo.packageName),
@@ -422,6 +464,7 @@ fun AppsScreen(
                                 val appInfo = shizukuApps[index]
                                 AppListItem(
                                     appInfo = appInfo,
+                                    shizukuCompatEnabled = shizukuCompatEnabled,
                                     refreshTrigger = refreshTrigger,
                                     isSelectionMode = isSelectionMode,
                                     isSelected = selectedApps.contains(appInfo.packageInfo.packageName),
@@ -493,7 +536,8 @@ fun AppsScreen(
                                             try {
                                                 val uid = it.packageInfo.applicationInfo?.uid ?: return@forEach
                                                 val isShizuku = it.appType == AppType.SHIZUKU
-                                                val type = if (isShizuku) "shizuku" else "stellar"
+                                                val type =
+                                                    if (isShizuku) "shizuku" else StellarApiConstants.PERMISSION_STELLAR
                                                 val flag = if (isShizuku) 0 else AuthorizationManager.FLAG_ASK
                                                 Stellar.updateFlagForUid(uid, type, flag)
                                             } catch (_: Exception) {}
@@ -517,7 +561,8 @@ fun AppsScreen(
                                             try {
                                                 val uid = it.packageInfo.applicationInfo?.uid ?: return@forEach
                                                 val isShizuku = it.appType == AppType.SHIZUKU
-                                                val type = if (isShizuku) "shizuku" else "stellar"
+                                                val type =
+                                                    if (isShizuku) "shizuku" else StellarApiConstants.PERMISSION_STELLAR
                                                 val flag = if (isShizuku) 2 else AuthorizationManager.FLAG_GRANTED
                                                 Stellar.updateFlagForUid(uid, type, flag)
                                             } catch (_: Exception) {}
@@ -541,7 +586,8 @@ fun AppsScreen(
                                             try {
                                                 val uid = it.packageInfo.applicationInfo?.uid ?: return@forEach
                                                 val isShizuku = it.appType == AppType.SHIZUKU
-                                                val type = if (isShizuku) "shizuku" else "stellar"
+                                                val type =
+                                                    if (isShizuku) "shizuku" else StellarApiConstants.PERMISSION_STELLAR
                                                 val flag = if (isShizuku) 4 else AuthorizationManager.FLAG_DENIED
                                                 Stellar.updateFlagForUid(uid, type, flag)
                                             } catch (_: Exception) {}
@@ -581,6 +627,7 @@ fun AppsScreen(
 @Composable
 fun AppListItem(
     appInfo: AppInfo,
+    shizukuCompatEnabled: Boolean,
     refreshTrigger: Int,
     isSelectionMode: Boolean = false,
     isSelected: Boolean = false,
@@ -596,6 +643,7 @@ fun AppListItem(
     val userId = UserHandleCompat.getUserId(uid)
     val packageName = packageInfo.packageName
     val isShizukuApp = appInfo.appType == AppType.SHIZUKU
+    val supportsFollowStartup = remember(packageInfo) { packageInfo.supportsFollowStartup() }
 
     val appName = remember(ai) {
         if (userId != UserHandleCompat.myUserId()) {
@@ -637,7 +685,8 @@ fun AppListItem(
         }
     }
 
-    val permissionType = if (isShizukuApp) "shizuku" else "stellar"
+    val permissionType =
+        if (isShizukuApp) "shizuku" else StellarApiConstants.PERMISSION_STELLAR
 
     fun shizukuToStellarFlag(shizukuFlag: Int): Int {
         return when (shizukuFlag) {
@@ -672,7 +721,7 @@ fun AppListItem(
     var followStartupFlag by remember(refreshTrigger) {
         mutableIntStateOf(
             try {
-                Stellar.getFlagForUid(uid, "follow_stellar_startup")
+                Stellar.getFlagForUid(uid, StellarApiConstants.PERMISSION_FOLLOW_STARTUP)
             } catch (e: Exception) {
                 LOGGER.w("获取跟随启动权限状态异常", tr = e)
                 AuthorizationManager.FLAG_ASK
@@ -838,6 +887,11 @@ fun AppListItem(
                         subtitle = if (isShizukuApp) stringResource(R.string.shizuku_permission_subtitle) else stringResource(
                             R.string.basic_permission_subtitle
                         ),
+                        badge = if (isShizukuApp && !shizukuCompatEnabled) {
+                            stringResource(R.string.shizuku_compat_disabled_badge)
+                        } else {
+                            null
+                        },
                         currentFlag = stellarFlag,
                         onFlagChange = { newFlag ->
                             try {
@@ -852,7 +906,7 @@ fun AppListItem(
                         }
                     )
 
-                    if (!isShizukuApp) {
+                    if (supportsFollowStartup) {
                         PermissionItem(
                             title = stringResource(R.string.follow_startup),
                             subtitle = stringResource(R.string.follow_startup_subtitle),
@@ -860,7 +914,11 @@ fun AppListItem(
                             onFlagChange = { newFlag ->
                                 try {
                                     followStartupFlag = newFlag
-                                    Stellar.updateFlagForUid(uid, "follow_stellar_startup", newFlag)
+                                    Stellar.updateFlagForUid(
+                                        uid,
+                                        StellarApiConstants.PERMISSION_FOLLOW_STARTUP,
+                                        newFlag
+                                    )
                                 } catch (e: Exception) {
                                     LOGGER.e("更新跟随启动权限失败", tr = e)
                                 }
@@ -891,6 +949,7 @@ fun AppListItem(
 fun PermissionItem(
     title: String,
     subtitle: String,
+    badge: String? = null,
     currentFlag: Int,
     onFlagChange: (Int) -> Unit
 ) {
@@ -898,21 +957,44 @@ fun PermissionItem(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                lineHeight = MaterialTheme.typography.bodyMedium.lineHeight
-            )
+            FlowRow(
+                modifier = Modifier.weight(1f),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                itemVerticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    lineHeight = MaterialTheme.typography.bodyMedium.lineHeight
+                )
+            }
+
+            if (badge != null) {
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = badge,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    modifier = Modifier
+                        .background(
+                            color = MaterialTheme.colorScheme.errorContainer,
+                            shape = AppShape.shapes.tag
+                        )
+                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                )
+            }
         }
 
         PermissionSegmentSelector(

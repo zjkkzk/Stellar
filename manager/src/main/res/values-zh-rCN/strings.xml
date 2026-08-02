@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name" translatable="false">Stellar</string>
     <!-- Navigation -->
     <string name="nav_home">启动</string>
     <string name="nav_apps">授权应用</string>
@@ -107,12 +108,20 @@
     <string name="default_start_page">默认启动页</string>
     <string name="boot_startup_options">开机启动</string>
     <string name="boot_startup_options_subtitle">配置开机自启动模式</string>
+    <string name="boot_start_mode">启动模式</string>
+    <string name="boot_start_mode_off_label">关闭</string>
+    <string name="boot_start_mode_broadcast_label">开机广播</string>
+    <string name="boot_start_mode_prewarm_label">预热</string>
+    <string name="boot_start_mode_script_label">Root脚本</string>
+    <string name="boot_start_none_subtitle">开机时不执行任何操作</string>
     <string name="boot_start_wireless">无线调试</string>
     <string name="boot_start_wireless_subtitle">通过无线调试开机启动</string>
     <string name="boot_start_root">Root</string>
     <string name="boot_start_root_subtitle">通过 Root 权限开机启动</string>
     <string name="boot_start_callback_mode">开机广播</string>
     <string name="boot_start_callback_mode_subtitle">通过系统广播在开机时自动启动</string>
+    <string name="boot_start_tcpip_prewarm_subtitle">开机后等待 WiFi，初始化 ADB TCP/IP 端口后断开，不启动 Stellar，以便无 WiFi 时启动 Stellar</string>
+    <string name="boot_start_adb_unavailable">当前权限或用户配置不支持开机 ADB 操作</string>
     <string name="boot_start_script_mode">开机脚本</string>
     <string name="boot_start_script_mode_subtitle">通过 Root 脚本在开机时自动启动</string>
     <string name="boot_start_script_mode_subtitle_no_root">需要 Root 权限</string>
@@ -132,9 +141,12 @@
     <string name="shizuku_compat_layer_subtitle">允许 Shizuku 应用通过 Stellar 服务运行</string>
     <string name="shizuku_compat_enabled">Shizuku 兼容层已启用</string>
     <string name="shizuku_compat_disabled">Shizuku 兼容层已禁用</string>
+    <string name="shizuku_compat_disabled_badge">兼容层关闭</string>
     <string name="setting_failed">设置失败: %s</string>
     <string name="drop_privileges">降权激活</string>
     <string name="drop_privileges_subtitle">Root 启动后降权到 Shell 用户运行</string>
+    <string name="wireless_debugging_su">无线调试提权 su</string>
+    <string name="wireless_debugging_su_subtitle">尝试通过无线调试使用 su 提权启动服务</string>
     <string name="daemon_enabled">进程守护</string>
     <string name="daemon_enabled_subtitle">双进程互守，自动重启</string>
     <string name="add_to_home_screen">添加到桌面</string>
@@ -185,6 +197,11 @@
     <string name="mode_click_execute_desc">手动点击执行命令</string>
     <string name="mode_follow_service">跟随服务</string>
     <string name="mode_follow_service_desc">服务启动时自动执行</string>
+    <string name="mode_follow_service_once">跟随服务执行指定次数</string>
+    <string name="mode_follow_service_once_desc">服务启动时按设定次数执行</string>
+    <string name="command_max_executions">执行次数</string>
+    <string name="command_enabled">启用</string>
+    <string name="command_execution_count">总计 %1$d/%2$d 次（成功 %3$d 次，失败 %4$d 次）</string>
     <string name="command">命令</string>
     <string name="quick_execute">快速执行</string>
     <string name="add_command">添加命令</string>
@@ -283,10 +300,10 @@
 
     <!-- Permission Request -->
     <string name="permission_request">授权请求</string>
-    <string name="permission_allow_prefix">要允许 </string>
-    <string name="permission_use_stellar"> 使用 Stellar 吗？</string>
-    <string name="permission_follow_startup"> 每次都跟随 Stellar 一起启动吗？</string>
-    <string name="permission_use_generic"> 使用 %s 吗？</string>
+    <string name="permission_allow_prefix">要允许\u0020</string>
+    <string name="permission_use_stellar">\u0020使用 Stellar 吗？</string>
+    <string name="permission_follow_startup">\u0020每次都跟随 Stellar 一起启动吗？</string>
+    <string name="permission_use_generic">\u0020使用 %s 吗？</string>
     <string name="always_allow">始终允许</string>
     <string name="allow_once">仅此一次</string>
     <string name="allow_and_return_to_source_app">允许并返回%1$s</string>
@@ -329,12 +346,14 @@
     <string name="boot_start_notification_title">Stellar 开机启动</string>
     <string name="boot_start_waiting_wifi">等待 WiFi 连接…</string>
     <string name="boot_start_enabling_wireless_adb">启用无线调试…</string>
+    <string name="boot_start_preparing_tcpip">正在准备 ADB TCP/IP…</string>
     <string name="boot_start_discovering_port">发现 ADB 端口…</string>
     <string name="boot_start_connecting">连接到 ADB 服务…</string>
     <string name="boot_start_waiting_unlock">等待设备解锁…</string>
     <string name="boot_start_retry">立即重试</string>
     <string name="boot_start_port_not_found">未找到 ADB 端口，重试中…</string>
     <string name="boot_start_connect_failed">ADB 连接失败，重试中…</string>
+    <string name="boot_start_prepare_tcpip_failed">ADB TCP/IP 准备失败，正在重试…</string>
     <string name="boot_start_binder_timeout">服务启动超时，重试中…</string>
 
     <string name="boot_script_install_success">开机脚本创建成功</string>

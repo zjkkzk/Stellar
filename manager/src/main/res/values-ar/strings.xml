@@ -1,5 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name" translatable="false">Stellar</string>
+    <!-- ADB Restricted -->
+    <string name="adb_restricted_hint_title">تقييد صلاحيات ADB</string>
+    <string name="adb_restricted_hint_message">بيئة ADB الحالية مقيّدة من النظام. قد لا تعمل بعض ميزات API بشكل صحيح.</string>
+    <string name="adb_restricted_features_title">الميزات المحدودة</string>
+    <string name="adb_restricted_features_message">هذه النتائج ناتجة عن فحوصات غير مؤذية في بيئة الخدمة الحالية.</string>
+    <string name="no_restricted_features">لم تُرصد ميزات مقيدة</string>
+    <string name="feature_status_available">متاح</string>
+    <string name="feature_status_restricted">مقيد</string>
+    <string name="feature_follow_service_command">أوامر متابعة الخدمة</string>
+    <string name="feature_terminal_command">أوامر الطرفية</string>
+    <string name="feature_shell_id_command">الأمر: id</string>
+    <string name="feature_property_read_command">الأمر: getprop</string>
+    <string name="feature_settings_read_command">الأمر: settings get</string>
+    <string name="feature_package_list_command">الأمر: cmd package</string>
+    <string name="feature_service_list_command">الأمر: service list</string>
+    <string name="feature_process_list_command">الأمر: ps -A</string>
+    <string name="feature_filesystem_read_command">الأمر: ls /system/bin</string>
+    <string name="feature_selinux_status_command">الأمر: getenforce</string>
+    <string name="feature_appops_manage">إدارة AppOps</string>
+    <string name="feature_runtime_permission_manage">منح/سحب الأذونات</string>
+    <string name="feature_secure_settings_write">الكتابة في الإعدادات الآمنة</string>
+    <string name="feature_boot_adb_start">تشغيل ADB عند الإقلاع</string>
     <!-- Navigation -->
     <string name="nav_home">تشغيل</string>
     <string name="nav_apps">التطبيقات</string>
@@ -86,12 +109,20 @@
     <string name="default_start_page">صفحة البداية الافتراضية</string>
     <string name="boot_startup_options">التشغيل عند الإقلاع</string>
     <string name="boot_startup_options_subtitle">تكوين وضع التشغيل التلقائي عند الإقلاع</string>
+    <string name="boot_start_mode">وضع التشغيل</string>
+    <string name="boot_start_mode_off_label">إيقاف</string>
+    <string name="boot_start_mode_broadcast_label">بث الإقلاع</string>
+    <string name="boot_start_mode_prewarm_label">تهيئة</string>
+    <string name="boot_start_mode_script_label">Root</string>
+    <string name="boot_start_none_subtitle">لا تنفذ أي إجراء عند الإقلاع</string>
     <string name="boot_start_wireless">التصحيح اللاسلكي</string>
     <string name="boot_start_wireless_subtitle">التشغيل عبر التصحيح اللاسلكي عند الإقلاع</string>
     <string name="boot_start_root">Root</string>
     <string name="boot_start_root_subtitle">التشغيل عبر Root عند الإقلاع</string>
     <string name="boot_start_callback_mode">بث الإقلاع</string>
     <string name="boot_start_callback_mode_subtitle">التشغيل التلقائي عند الإقلاع عبر بث النظام</string>
+    <string name="boot_start_tcpip_prewarm_subtitle">انتظار WiFi عند الإقلاع وتهيئة منفذ ADB TCP/IP ثم قطع الاتصال دون بدء Stellar، حتى يمكن بدء Stellar لاحقًا بدون WiFi</string>
+    <string name="boot_start_adb_unavailable">إجراءات ADB عند الإقلاع غير متاحة بالأذونات الحالية أو ملف المستخدم الحالي</string>
     <string name="boot_start_script_mode">سكريبت الإقلاع</string>
     <string name="boot_start_script_mode_subtitle">التشغيل التلقائي عند الإقلاع عبر سكريبت Root</string>
     <string name="boot_start_script_mode_subtitle_no_root">يتطلب صلاحية Root</string>
@@ -111,11 +142,19 @@
     <string name="shizuku_compat_layer_subtitle">السماح لتطبيقات Shizuku بالعمل عبر Stellar</string>
     <string name="shizuku_compat_enabled">تم تفعيل توافق Shizuku</string>
     <string name="shizuku_compat_disabled">تم تعطيل توافق Shizuku</string>
+    <string name="shizuku_compat_disabled_badge">غير مفعّل</string>
     <string name="setting_failed">فشل الإعداد: %s</string>
     <string name="drop_privileges">تخفيض الصلاحيات</string>
     <string name="drop_privileges_subtitle">التشغيل كمستخدم Shell بعد تشغيل Root</string>
     <string name="daemon_enabled">حارس العملية</string>
     <string name="daemon_enabled_subtitle">مراقبة متبادلة لإعادة التشغيل التلقائي</string>
+    <string name="add_to_home_screen">إضافة إلى الشاشة الرئيسية</string>
+    <string name="add_to_home_screen_and_save">إضافة إلى الشاشة الرئيسية والحفظ</string>
+    <string name="shortcut_not_supported">المشغّل الحالي لا يدعم الاختصارات المثبّتة</string>
+    <string name="shortcut_command_not_found">الأمر المحفوظ لم يعد موجوداً</string>
+    <string name="shortcut_command_started">بدأ تنفيذ الأمر</string>
+    <string name="hide_background">الإخفاء في الخلفية</string>
+    <string name="hide_background_subtitle">إخفاء Stellar من التطبيقات الحديثة</string>
     <string name="tcpip_port">منفذ TCP/IP</string>
     <string name="tcpip_port_subtitle">تغيير منفذ TCP/IP لـ adbd بعد التشغيل عبر التصحيح اللاسلكي</string>
     <string name="cannot_generate_safe_port">تعذّر إنشاء منفذ آمن، يرجى تعيينه يدوياً</string>
@@ -255,12 +294,15 @@
 
     <!-- Permission Request -->
     <string name="permission_request">طلب إذن</string>
-    <string name="permission_allow_prefix">هل تسمح لـ </string>
-    <string name="permission_use_stellar"> باستخدام Stellar؟</string>
-    <string name="permission_follow_startup"> بالتشغيل مع Stellar في كل مرة؟</string>
-    <string name="permission_use_generic"> باستخدام %s؟</string>
+    <string name="permission_allow_prefix">هل تسمح لـ\u0020</string>
+    <string name="permission_use_stellar">\u0020باستخدام Stellar؟</string>
+    <string name="permission_follow_startup">\u0020بالتشغيل مع Stellar في كل مرة؟</string>
+    <string name="permission_use_generic">\u0020باستخدام %s؟</string>
     <string name="always_allow">السماح دائماً</string>
     <string name="allow_once">السماح مرة واحدة</string>
+    <string name="allow_and_return_to_source_app">السماح والعودة إلى %1$s</string>
+    <string name="allow_once_and_return_to_source_app">السماح مرة واحدة والعودة إلى %1$s</string>
+    <string name="cannot_open_source_app">تعذّر فتح التطبيق المصدر</string>
     <string name="deny">رفض</string>
     <string name="deny_and_dont_ask">رفض وعدم السؤال مجدداً</string>
 
@@ -298,12 +340,14 @@
     <string name="boot_start_notification_title">تشغيل Stellar عند الإقلاع</string>
     <string name="boot_start_waiting_wifi">في انتظار اتصال WiFi…</string>
     <string name="boot_start_enabling_wireless_adb">تمكين التصحيح اللاسلكي…</string>
+    <string name="boot_start_preparing_tcpip">جارٍ تهيئة ADB TCP/IP…</string>
     <string name="boot_start_discovering_port">اكتشاف منفذ ADB…</string>
     <string name="boot_start_connecting">الاتصال بخدمة ADB…</string>
     <string name="boot_start_waiting_unlock">في انتظار فتح قفل الجهاز…</string>
     <string name="boot_start_retry">إعادة المحاولة الآن</string>
     <string name="boot_start_port_not_found">لم يتم العثور على منفذ ADB، إعادة المحاولة…</string>
     <string name="boot_start_connect_failed">فشل اتصال ADB، إعادة المحاولة…</string>
+    <string name="boot_start_prepare_tcpip_failed">فشل تهيئة ADB TCP/IP، إعادة المحاولة…</string>
     <string name="boot_start_binder_timeout">انتهت مهلة بدء الخدمة، إعادة المحاولة…</string>
 
     <string name="boot_script_install_success">تم إنشاء سكريبت الإقلاع بنجاح</string>

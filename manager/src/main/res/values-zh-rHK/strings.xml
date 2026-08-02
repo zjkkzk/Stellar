@@ -1,5 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name" translatable="false">Stellar</string>
+    <!-- ADB Restricted -->
+    <string name="adb_restricted_hint_title">ADB 權限受限</string>
+    <string name="adb_restricted_hint_message">目前的 ADB 環境受到系統限制，部分 API 功能可能無法正常運作。</string>
+    <string name="adb_restricted_features_title">受限功能</string>
+    <string name="adb_restricted_features_message">這些結果來自目前服務環境中的非破壞性探測。</string>
+    <string name="no_restricted_features">未偵測到受限功能</string>
+    <string name="feature_status_available">可用</string>
+    <string name="feature_status_restricted">受限</string>
+    <string name="feature_follow_service_command">跟隨服務命令</string>
+    <string name="feature_terminal_command">終端命令</string>
+    <string name="feature_shell_id_command">指令：id</string>
+    <string name="feature_property_read_command">指令：getprop</string>
+    <string name="feature_settings_read_command">指令：settings get</string>
+    <string name="feature_package_list_command">指令：cmd package</string>
+    <string name="feature_service_list_command">指令：service list</string>
+    <string name="feature_process_list_command">指令：ps -A</string>
+    <string name="feature_filesystem_read_command">指令：ls /system/bin</string>
+    <string name="feature_selinux_status_command">指令：getenforce</string>
+    <string name="feature_appops_manage">AppOps 管理</string>
+    <string name="feature_runtime_permission_manage">權限授予／撤銷</string>
+    <string name="feature_secure_settings_write">安全設定寫入</string>
+    <string name="feature_boot_adb_start">開機啟動 ADB</string>
     <!-- Navigation -->
     <string name="nav_home">啟動</string>
     <string name="nav_apps">授權應用</string>
@@ -86,12 +109,20 @@
     <string name="default_start_page">預設啟動頁</string>
     <string name="boot_startup_options">開機啟動</string>
     <string name="boot_startup_options_subtitle">設定開機自啟動模式</string>
+    <string name="boot_start_mode">啟動模式</string>
+    <string name="boot_start_mode_off_label">關閉</string>
+    <string name="boot_start_mode_broadcast_label">開機廣播</string>
+    <string name="boot_start_mode_prewarm_label">預熱</string>
+    <string name="boot_start_mode_script_label">Root腳本</string>
+    <string name="boot_start_none_subtitle">開機時不執行任何操作</string>
     <string name="boot_start_wireless">無線調試</string>
     <string name="boot_start_wireless_subtitle">透過無線調試開機啟動</string>
     <string name="boot_start_root">Root</string>
     <string name="boot_start_root_subtitle">透過 Root 權限開機啟動</string>
     <string name="boot_start_callback_mode">開機廣播</string>
     <string name="boot_start_callback_mode_subtitle">通過系統廣播在開機時自動啟動</string>
+    <string name="boot_start_tcpip_prewarm_subtitle">開機後等待 WiFi，初始化 ADB TCP/IP 端口後斷開，不啟動 Stellar，以便無 WiFi 時啟動 Stellar</string>
+    <string name="boot_start_adb_unavailable">目前權限或用戶設定不支援開機 ADB 操作</string>
     <string name="boot_start_script_mode">開機腳本</string>
     <string name="boot_start_script_mode_subtitle">通過 Root 腳本在開機時自動啟動</string>
     <string name="boot_start_script_mode_subtitle_no_root">需要 Root 權限</string>
@@ -111,11 +142,19 @@
     <string name="shizuku_compat_layer_subtitle">允許 Shizuku 應用透過 Stellar 服務運行</string>
     <string name="shizuku_compat_enabled">Shizuku 兼容層已啟用</string>
     <string name="shizuku_compat_disabled">Shizuku 兼容層已停用</string>
+    <string name="shizuku_compat_disabled_badge">兼容層未啟用</string>
     <string name="setting_failed">設定失敗: %s</string>
     <string name="drop_privileges">降權啟動</string>
     <string name="drop_privileges_subtitle">Root 啟動後降權到 Shell 用戶運行</string>
     <string name="daemon_enabled">進程守護</string>
     <string name="daemon_enabled_subtitle">雙進程互守，自動重啟</string>
+    <string name="add_to_home_screen">加入主畫面</string>
+    <string name="add_to_home_screen_and_save">加入主畫面並儲存</string>
+    <string name="shortcut_not_supported">目前桌面不支援固定捷徑</string>
+    <string name="shortcut_command_not_found">已儲存的指令已不存在</string>
+    <string name="shortcut_command_started">指令已開始執行</string>
+    <string name="hide_background">隱藏後台</string>
+    <string name="hide_background_subtitle">從最近任務中隱藏 Stellar</string>
     <string name="tcpip_port">TCP/IP 端口</string>
     <string name="tcpip_port_subtitle">透過無線調試啟動後，將 adbd 的 TCP/IP 端口切換到指定端口</string>
     <string name="cannot_generate_safe_port">無法生成安全端口，請手動設定</string>
@@ -255,12 +294,15 @@
 
     <!-- Permission Request -->
     <string name="permission_request">授權請求</string>
-    <string name="permission_allow_prefix">要允許 </string>
-    <string name="permission_use_stellar"> 使用 Stellar 嗎？</string>
-    <string name="permission_follow_startup"> 每次都跟隨 Stellar 一起啟動嗎？</string>
-    <string name="permission_use_generic"> 使用 %s 嗎？</string>
+    <string name="permission_allow_prefix">要允許\u0020</string>
+    <string name="permission_use_stellar">\u0020使用 Stellar 嗎？</string>
+    <string name="permission_follow_startup">\u0020每次都跟隨 Stellar 一起啟動嗎？</string>
+    <string name="permission_use_generic">\u0020使用 %s 嗎？</string>
     <string name="always_allow">始終允許</string>
     <string name="allow_once">僅此一次</string>
+    <string name="allow_and_return_to_source_app">允許並返回%1$s</string>
+    <string name="allow_once_and_return_to_source_app">僅此一次並返回%1$s</string>
+    <string name="cannot_open_source_app">無法開啟來源應用</string>
     <string name="deny">拒絕</string>
     <string name="deny_and_dont_ask">拒絕且不再詢問</string>
 
@@ -298,12 +340,14 @@
     <string name="boot_start_notification_title">Stellar 開機啟動</string>
     <string name="boot_start_waiting_wifi">等待 WiFi 連接…</string>
     <string name="boot_start_enabling_wireless_adb">啟用無線調試…</string>
+    <string name="boot_start_preparing_tcpip">正在準備 ADB TCP/IP…</string>
     <string name="boot_start_discovering_port">發現 ADB 端口…</string>
     <string name="boot_start_connecting">連接到 ADB 服務…</string>
     <string name="boot_start_waiting_unlock">等待裝置解鎖…</string>
     <string name="boot_start_retry">立即重試</string>
     <string name="boot_start_port_not_found">未找到 ADB 端口，重試中…</string>
     <string name="boot_start_connect_failed">ADB 連接失敗，重試中…</string>
+    <string name="boot_start_prepare_tcpip_failed">ADB TCP/IP 準備失敗，正在重試…</string>
     <string name="boot_start_binder_timeout">服務啟動超時，重試中…</string>
 
     <string name="boot_script_install_success">開機腳本創建成功</string>

@@ -12,6 +12,15 @@ interface CommandDao {
 
     @Query("DELETE FROM commands")
     suspend fun deleteAll()
+
+    @Query("UPDATE commands SET enabled = :enabled, executionCount = CASE WHEN :enabled = 1 THEN 0 ELSE executionCount END, successCount = CASE WHEN :enabled = 1 THEN 0 ELSE successCount END, failureCount = CASE WHEN :enabled = 1 THEN 0 ELSE failureCount END WHERE id = :id")
+    suspend fun setEnabled(id: String, enabled: Boolean)
+
+    @Query("UPDATE commands SET successCount = successCount + :success, failureCount = failureCount + :failure WHERE id = :id")
+    suspend fun recordExecution(id: String, success: Int, failure: Int)
+
+    @Query("UPDATE commands SET executionCount = executionCount + 1, enabled = CASE WHEN executionCount + 1 >= maxExecutions THEN 0 ELSE enabled END WHERE id = :id AND mode = 'FOLLOW_SERVICE_ONCE' AND enabled = 1 AND executionCount < maxExecutions")
+    suspend fun claimExecution(id: String): Int
 }
 
 @Dao

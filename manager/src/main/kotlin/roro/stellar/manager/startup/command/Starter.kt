@@ -23,4 +23,13 @@ object Starter {
                 baseCommand
             }
         }
+
+    val wirelessDebuggingCommand: String
+        get() {
+            if (!StellarSettings.getPreferences().getBoolean(StellarSettings.WIRELESS_DEBUGGING_SU, false)) {
+                return internalCommand
+            }
+            val quotedCommand = internalCommand.replace("'", "'\\\"'\\\"'")
+            return "su -c '$quotedCommand' || $internalCommand"
+        }
 }

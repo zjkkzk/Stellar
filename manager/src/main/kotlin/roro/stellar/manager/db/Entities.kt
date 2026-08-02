@@ -8,7 +8,12 @@ data class CommandEntity(
     @PrimaryKey val id: String,
     val title: String,
     val command: String,
-    val mode: String
+    val mode: String,
+    val enabled: Boolean = true,
+    val maxExecutions: Int = 0,
+    val executionCount: Int = 0,
+    val successCount: Int = 0,
+    val failureCount: Int = 0
 )
 
 @Entity(tableName = "config")

@@ -50,25 +50,31 @@ import roro.stellar.manager.util.Logger.Companion.LOGGER
 
 enum class CommandMode(val titleRes: Int, val icon: ImageVector, val descriptionRes: Int) {
     CLICK_EXECUTE(R.string.mode_click_execute, Icons.Outlined.PlayArrow, R.string.mode_click_execute_desc),
-    FOLLOW_SERVICE(R.string.mode_follow_service, Icons.Outlined.Sync, R.string.mode_follow_service_desc)
+    FOLLOW_SERVICE(R.string.mode_follow_service, Icons.Outlined.Sync, R.string.mode_follow_service_desc),
+    FOLLOW_SERVICE_ONCE(R.string.mode_follow_service_once, Icons.Outlined.Sync, R.string.mode_follow_service_once_desc)
 }
 
 data class CommandItem(
     val id: String = UUID.randomUUID().toString(),
     val title: String,
     val command: String,
-    val mode: CommandMode
+    val mode: CommandMode,
+    val enabled: Boolean = true,
+    val maxExecutions: Int = 0,
+    val executionCount: Int = 0,
+    val successCount: Int = 0,
+    val failureCount: Int = 0
 )
 
 private suspend fun loadCommands(context: android.content.Context): List<CommandItem> =
     AppDatabase.get(context).commandDao().getAll().map {
-        CommandItem(it.id, it.title, it.command, CommandMode.valueOf(it.mode))
+        CommandItem(it.id, it.title, it.command, CommandMode.valueOf(it.mode), it.enabled, it.maxExecutions, it.executionCount, it.successCount, it.failureCount)
     }
 
 private suspend fun saveCommands(context: android.content.Context, commands: List<CommandItem>) {
     val dao = AppDatabase.get(context).commandDao()
     dao.deleteAll()
-    dao.insertAll(commands.map { CommandEntity(it.id, it.title, it.command, it.mode.name) })
+    dao.insertAll(commands.map { CommandEntity(it.id, it.title, it.command, it.mode.name, it.enabled, it.maxExecutions, it.executionCount, it.successCount, it.failureCount) })
     commands.forEach { LOGGER.d("保存命令: title=${it.title}, command=${it.command}, mode=${it.mode.name}") }
 }
 
@@ -147,21 +153,23 @@ fun TerminalScreen(
     if (showCreateDialog) {
         CreateCommandDialog(
             onDismiss = { showCreateDialog = false },
-            onConfirm = { title, command, mode ->
+            onConfirm = { title, command, mode, maxExecutions ->
                 val newCommand = CommandItem(
                     title = title,
                     command = command,
-                    mode = mode
+                    mode = mode,
+                    maxExecutions = maxExecutions
                 )
                 commands = commands + newCommand
                 scope.launch { saveCommands(context, commands) }
                 showCreateDialog = false
             },
-            onAddShortcut = { title, command, mode ->
+            onAddShortcut = { title, command, mode, maxExecutions ->
                 val newCommand = CommandItem(
                     title = title,
                     command = command,
-                    mode = mode
+                    mode = mode,
+                    maxExecutions = maxExecutions
                 )
                 commands = commands + newCommand
                 scope.launch { saveCommands(context, commands) }
@@ -175,15 +183,28 @@ fun TerminalScreen(
         EditCommandDialog(
             item = item,
             onDismiss = { editingCommand = null },
-            onConfirm = { title, command ->
+            onEnabledChange = { enabled ->
                 commands = commands.map {
-                    if (it.id == item.id) it.copy(title = title, command = command) else it
+                    if (it.id == item.id) {
+                        it.copy(
+                            enabled = enabled,
+                            executionCount = if (enabled) 0 else it.executionCount,
+                            successCount = if (enabled) 0 else it.successCount,
+                            failureCount = if (enabled) 0 else it.failureCount
+                        )
+                    } else it
+                }
+                scope.launch { AppDatabase.get(context).commandDao().setEnabled(item.id, enabled) }
+            },
+            onConfirm = { title, command, maxExecutions ->
+                commands = commands.map {
+                    if (it.id == item.id) it.copy(title = title, command = command, maxExecutions = maxExecutions) else it
                 }
                 scope.launch { saveCommands(context, commands) }
                 editingCommand = null
             },
-            onAddShortcut = { title, command ->
-                val updated = item.copy(title = title, command = command)
+            onAddShortcut = { title, command, maxExecutions ->
+                val updated = item.copy(title = title, command = command, maxExecutions = maxExecutions)
                 commands = commands.map { if (it.id == item.id) updated else it }
                 scope.launch { saveCommands(context, commands) }
                 CommandShortcutManager.requestPin(context, updated)
@@ -409,25 +430,26 @@ private fun AddCommandCard(onClick: () -> Unit) {
 @Composable
 private fun CreateCommandDialog(
     onDismiss: () -> Unit,
-    onConfirm: (String, String, CommandMode) -> Unit,
-    onAddShortcut: (String, String, CommandMode) -> Unit
+    onConfirm: (String, String, CommandMode, Int) -> Unit,
+    onAddShortcut: (String, String, CommandMode, Int) -> Unit
 ) {
     var selectedMode by remember { mutableStateOf(CommandMode.CLICK_EXECUTE) }
     var title by remember { mutableStateOf("") }
     var command by remember { mutableStateOf("") }
+    var maxExecutions by remember { mutableStateOf("1") }
 
     StellarDialog(
         onDismissRequest = onDismiss,
         title = stringResource(R.string.create_command),
         confirmText = stringResource(R.string.save),
         confirmEnabled = command.isNotBlank(),
-        onConfirm = { onConfirm(title.ifBlank { command.take(20) }, command, selectedMode) },
+        onConfirm = { onConfirm(title.ifBlank { command.take(20) }, command, selectedMode, maxExecutions.toIntOrNull()?.coerceAtLeast(1) ?: 1) },
         onDismiss = onDismiss,
         leadingAction = {
             TextButton(
                 enabled = command.isNotBlank(),
                 onClick = {
-                    onAddShortcut(title.ifBlank { command.take(20) }, command, selectedMode)
+                    onAddShortcut(title.ifBlank { command.take(20) }, command, selectedMode, maxExecutions.toIntOrNull()?.coerceAtLeast(1) ?: 1)
                 }
             ) {
                 Text(stringResource(R.string.add_to_home_screen_and_save))
@@ -444,6 +466,17 @@ private fun CreateCommandDialog(
                 shape = AppShape.shapes.inputField,
                 singleLine = true
             )
+
+            if (selectedMode == CommandMode.FOLLOW_SERVICE_ONCE) {
+                OutlinedTextField(
+                    value = maxExecutions,
+                    onValueChange = { value -> maxExecutions = value.filter(Char::isDigit).take(4) },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(stringResource(R.string.command_max_executions)) },
+                    shape = AppShape.shapes.inputField,
+                    singleLine = true
+                )
+            }
 
             OutlinedTextField(
                 value = command,
@@ -540,23 +573,29 @@ private fun ModeSelectionItem(
 private fun EditCommandDialog(
     item: CommandItem,
     onDismiss: () -> Unit,
-    onConfirm: (String, String) -> Unit,
-    onAddShortcut: (String, String) -> Unit
+    onEnabledChange: (Boolean) -> Unit,
+    onConfirm: (String, String, Int) -> Unit,
+    onAddShortcut: (String, String, Int) -> Unit
 ) {
     var title by remember { mutableStateOf(item.title) }
     var command by remember { mutableStateOf(item.command) }
+    var maxExecutions by remember { mutableStateOf(item.maxExecutions.coerceAtLeast(1).toString()) }
+    var enabled by remember { mutableStateOf(item.enabled) }
+    var executionCount by remember { mutableStateOf(item.executionCount) }
+    var successCount by remember { mutableStateOf(item.successCount) }
+    var failureCount by remember { mutableStateOf(item.failureCount) }
 
     StellarDialog(
         onDismissRequest = onDismiss,
         title = stringResource(R.string.edit_command),
         confirmText = stringResource(R.string.save),
         confirmEnabled = command.isNotBlank(),
-        onConfirm = { onConfirm(title, command) },
+        onConfirm = { onConfirm(title, command, maxExecutions.toIntOrNull()?.coerceAtLeast(1) ?: 1) },
         onDismiss = onDismiss,
         leadingAction = {
             TextButton(
                 enabled = command.isNotBlank(),
-                onClick = { onAddShortcut(title.ifBlank { command.take(20) }, command) }
+                onClick = { onAddShortcut(title.ifBlank { command.take(20) }, command, maxExecutions.toIntOrNull()?.coerceAtLeast(1) ?: 1) }
             ) {
                 Text(stringResource(R.string.add_to_home_screen))
             }
@@ -588,6 +627,43 @@ private fun EditCommandDialog(
                 }
             }
 
+            if (item.mode == CommandMode.FOLLOW_SERVICE_ONCE) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.command_enabled),
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Switch(
+                        checked = enabled,
+                        onCheckedChange = { value ->
+                            enabled = value
+                            if (value) {
+                                executionCount = 0
+                                successCount = 0
+                                failureCount = 0
+                            }
+                            onEnabledChange(value)
+                        }
+                    )
+                }
+
+                Text(
+                    text = stringResource(
+                        R.string.command_execution_count,
+                        executionCount,
+                        item.maxExecutions,
+                        successCount,
+                        failureCount
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
             OutlinedTextField(
                 value = title,
                 onValueChange = { title = it },
@@ -610,6 +686,17 @@ private fun EditCommandDialog(
                     fontSize = 13.sp
                 )
             )
+
+            if (item.mode == CommandMode.FOLLOW_SERVICE_ONCE) {
+                OutlinedTextField(
+                    value = maxExecutions,
+                    onValueChange = { value -> maxExecutions = value.filter(Char::isDigit).take(4) },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(stringResource(R.string.command_max_executions)) },
+                    shape = AppShape.shapes.inputField,
+                    singleLine = true
+                )
+            }
         }
     }
 }
