@@ -12,12 +12,15 @@
 官方交流群组：
 [![QQ群](https://img.shields.io/badge/QQ-1群-12B7F5?style=flat-square&logo=qq&logoColor=white)](https://qm.qq.com/cgi-bin/qm/qr?k=bIpIHQX12Kajh951zELULlF5FN6zeN0y&jump_from=webapi&authKey=Kf6RnfWG1o7whQIi20Uz+X6/dzf/D6/TzED25Pyb0N5td/eVClgysJXgPYnbZhr5)
 
+Language: [English](README_en.md) | 中文
+
 </div>
 
 ## 项目简介
 
 Stellar 是 [Shizuku](https://github.com/RikkaApps/Shizuku) 的深度定制版本，专为开发者提供更灵活、更强大的特权 API 框架。通过 ADB 无线调试或 Root 权限启动服务后，应用程序可以调用需要系统级权限的 API，而无需应用本身拥有 Root 权限。
 
+Tip：我们鼓励贡献者为稳定性高的代码提交 PR，而不是仅将修改保留在自己的 Fork 仓库中。
 ## 核心特性
 
 Stellar 相比原版 Shizuku 进行了以下核心改进：
@@ -191,3 +194,11 @@ su (root) → libchid.so 2000 → libstellar.so --apk=...
 
 - [完整 API 文档](INTEGRATION_GUIDE.md)
 - [原版 Shizuku](https://github.com/RikkaApps/Shizuku)
+
+<a href="https://www.star-history.com/?repos=roro2239%2FStellar&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=roro2239/Stellar&type=date&theme=dark&legend=top-left&sealed_token=DOGFkMNyKuECKihlTE4gifDbvly4k4Wr5IjBhG6w407ZVASud6bVrZlbDfNkY6rKv8GpKgpOYQ8uYyfFmwMEx6uLVcustg1MI-tvtusH3twxsJFOlmpY-g" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=roro2239/Stellar&type=date&legend=top-left&sealed_token=DOGFkMNyKuECKihlTE4gifDbvly4k4Wr5IjBhG6w407ZVASud6bVrZlbDfNkY6rKv8GpKgpOYQ8uYyfFmwMEx6uLVcustg1MI-tvtusH3twxsJFOlmpY-g" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=roro2239/Stellar&type=date&legend=top-left&sealed_token=DOGFkMNyKuECKihlTE4gifDbvly4k4Wr5IjBhG6w407ZVASud6bVrZlbDfNkY6rKv8GpKgpOYQ8uYyfFmwMEx6uLVcustg1MI-tvtusH3twxsJFOlmpY-g" />
+ </picture>
+</a>
