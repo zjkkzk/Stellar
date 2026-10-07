@@ -11,6 +11,13 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.USE_LOOPBACK_INTERFACE" />
+    <!--
+        Android 17 (API 37) blocks local network access - including the mDNS
+        discovery used for wireless ADB pairing - for apps targeting SDK 37+
+        unless this runtime permission is granted. It belongs to the
+        NEARBY_DEVICES permission group.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission
         android:name="android.permission.ACCESS_WIFI_STATE"

@@ -64,6 +64,7 @@ import roro.stellar.manager.adb.AdbMdns
 import roro.stellar.manager.adb.AdbPairingService
 import roro.stellar.manager.adb.AdbWirelessHelper
 import roro.stellar.manager.AppConstants
+import roro.stellar.manager.compat.LocalNetwork
 import roro.stellar.manager.startup.command.Starter
 import roro.stellar.manager.StellarSettings
 import roro.stellar.manager.ui.navigation.components.FixedTopAppBar
@@ -116,6 +117,30 @@ internal fun StarterScreen(
     val scrollState = rememberScrollState()
 
     val horizontalPadding = if (isLandscape) 48.dp else AppSpacing.screenHorizontalPadding
+
+    val hasLocalNetworkPermission by viewModel.hasLocalNetworkPermission.collectAsState()
+
+    // Android 17 (API 37) blocks local network access - and therefore all mDNS
+    // discovery used for wireless ADB - until ACCESS_LOCAL_NETWORK is granted.
+    // Request it once up front so the retry loops below have a chance to work.
+    val localNetworkPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        viewModel.setLocalNetworkPermission(granted)
+        if (!granted) {
+            Toast.makeText(
+                context,
+                context.getString(R.string.need_local_network_permission),
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    LaunchedEffect(isRoot) {
+        if (viewModel.needsLocalNetworkPermission()) {
+            localNetworkPermissionLauncher.launch(LocalNetwork.PERMISSION)
+        }
+    }
 
     LaunchedEffect(currentStepIndex, steps) {
         if (currentStepIndex > 0) {
@@ -282,6 +307,7 @@ private fun StepActionContent(
     context: Context
 ) {
     val hasNotificationPermission by viewModel.hasNotificationPermission.collectAsState()
+    val hasLocalNetworkPermission by viewModel.hasLocalNetworkPermission.collectAsState()
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -292,8 +318,36 @@ private fun StepActionContent(
         }
     }
 
+    val localNetworkPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        viewModel.setLocalNetworkPermission(granted)
+        if (!granted) {
+            Toast.makeText(context, context.getString(R.string.need_local_network_permission), Toast.LENGTH_LONG).show()
+        }
+    }
+
     Column {
         Spacer(Modifier.height(12.dp))
+
+        // Android 17 needs the local network grant before any mDNS discovery can
+        // succeed, so offer a way back if the user dismissed or denied it.
+        if (!hasLocalNetworkPermission && !viewModel.isRootMode()) {
+            Text(
+                text = stringResource(R.string.need_local_network_permission),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error
+            )
+            Spacer(Modifier.height(8.dp))
+            Button(
+                onClick = { localNetworkPermissionLauncher.launch(LocalNetwork.PERMISSION) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = AppShape.shapes.cardMedium
+            ) {
+                Text(stringResource(R.string.grant_permission), Modifier.padding(vertical = 4.dp))
+            }
+            Spacer(Modifier.height(12.dp))
+        }
 
         when (step.title) {
             stringResource(R.string.enable_wireless_debugging) -> {
@@ -907,6 +961,14 @@ internal class StarterViewModel(
     )
     val hasNotificationPermission: StateFlow<Boolean> = _hasNotificationPermission.asStateFlow()
 
+    /**
+     * Android 17 gates mDNS discovery behind ACCESS_LOCAL_NETWORK. Without it
+     * wireless ADB discovery silently returns nothing, so the whole wireless
+     * flow has to wait for the grant instead of retrying blindly.
+     */
+    private val _hasLocalNetworkPermission = MutableStateFlow(LocalNetwork.hasAccess(context))
+    val hasLocalNetworkPermission: StateFlow<Boolean> = _hasLocalNetworkPermission.asStateFlow()
+
     private val _outputLines = MutableStateFlow<List<String>>(emptyList())
     val outputLines: StateFlow<List<String>> = _outputLines.asStateFlow()
 
@@ -917,9 +979,41 @@ internal class StarterViewModel(
     private enum class PairingPhase { NONE, ENABLE_WIRELESS, PAIRING }
     private var pairingPhase = PairingPhase.NONE
 
+    /** True once the flow has been deferred waiting for the local network grant. */
+    private var waitingForLocalNetwork = false
+
     init {
         initializeSteps()
-        startProcess()
+        if (needsLocalNetworkPermission()) {
+            // Ask before touching mDNS so the user sees one clear prompt
+            // instead of a discovery loop that can never succeed.
+            waitingForLocalNetwork = true
+        } else {
+            startProcess()
+        }
+    }
+
+    fun needsLocalNetworkPermission(): Boolean = !isRoot && !LocalNetwork.hasAccess(context)
+
+    fun isRootMode(): Boolean = isRoot
+
+    fun setLocalNetworkPermission(granted: Boolean) {
+        _hasLocalNetworkPermission.value = granted
+        if (granted) {
+            if (waitingForLocalNetwork) {
+                waitingForLocalNetwork = false
+                startProcess()
+            }
+            return
+        }
+
+        // Denied: stop here with an actionable message rather than looping.
+        waitingForLocalNetwork = false
+        viewModelScope.launch {
+            val message = context.getString(R.string.need_local_network_permission)
+            updateStep(0, StepStatus.ERROR, message, needsUserAction = true)
+            _errorMessage.value = message
+        }
     }
 
     private fun initializeSteps() {
@@ -989,7 +1083,7 @@ internal class StarterViewModel(
                     updateStep(nextIndex, StepStatus.RUNNING, currentSteps[nextIndex].description, true)
                 }
             }
-            if (atLeast30) startPairingService()
+            if (atLeast30 && !needsLocalNetworkPermission()) startPairingService()
         }
     }
 
@@ -1213,7 +1307,16 @@ internal class StarterViewModel(
                     showEnableWirelessAdbStep()
                 }
             },
-            maxRefreshCount = 3
+            maxRefreshCount = 3,
+            onPermissionRequired = {
+                if (!handled && needsLocalNetworkPermission()) {
+                    handled = true
+                    _hasLocalNetworkPermission.value = false
+                    waitingForLocalNetwork = false
+                    updateStep(0, StepStatus.ERROR, context.getString(R.string.need_local_network_permission))
+                    _errorMessage.value = context.getString(R.string.need_local_network_permission)
+                }
+            }
         ).apply { start() }
     }
 
@@ -1251,7 +1354,9 @@ internal class StarterViewModel(
 
         _currentStepIndex.value = if (hasPermission) 2 else 1
 
-        if (hasPermission && atLeast30) {
+        // The pairing service also relies on mDNS, so it needs the local
+        // network grant as well.
+        if (hasPermission && atLeast30 && !needsLocalNetworkPermission()) {
             startPairingService()
         }
     }

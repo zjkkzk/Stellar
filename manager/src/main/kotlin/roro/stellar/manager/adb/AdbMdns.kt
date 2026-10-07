@@ -9,6 +9,7 @@ import android.os.Looper
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.Observer
+import roro.stellar.manager.compat.LocalNetwork
 import java.io.IOException
 import java.net.InetSocketAddress
 import java.net.NetworkInterface
@@ -22,8 +23,11 @@ class AdbMdns(
     private val observer: Observer<Int>,
     private val onMaxRefresh: (() -> Unit)? = null,
     private val onStatusUpdate: ((String) -> Unit)? = null,
-    private val maxRefreshCount: Int = MAX_REFRESH_COUNT
+    private val maxRefreshCount: Int = MAX_REFRESH_COUNT,
+    private val onPermissionRequired: (() -> Unit)? = null
 ) {
+
+    private val appContext: Context = context.applicationContext
 
     @Volatile
     private var registered = false
@@ -78,6 +82,18 @@ class AdbMdns(
 
     fun start() {
         if (running) return
+
+        // Android 17 blocks local network traffic for apps targeting SDK 37
+        // until ACCESS_LOCAL_NETWORK is granted. Discovery would still report
+        // "started" but never deliver a service, so the refresh loop below
+        // would spin through its whole retry budget for nothing. Bail out and
+        // let the caller ask the user for the permission instead.
+        if (!LocalNetwork.hasAccess(appContext)) {
+            Log.w(TAG, "缺少 ACCESS_LOCAL_NETWORK 权限，停止服务发现")
+            onPermissionRequired?.invoke()
+            return
+        }
+
         running = true
         startFailedRetryCount = 0
         refreshCount = 0

@@ -34,15 +34,21 @@ jobs:
       run: chmod +x gradlew
       
     - name: 设置 Android SDK
-      uses: android-actions/setup-android@v3
-      
+      uses: android-actions/setup-android@v4
+      with:
+        # setup-android@v3 默认安装 'tools' 包，该包已被 Google 从 SDK 仓库
+        # 下架，导致 sdkmanager 以 "Failed to find package 'tools'" 退出 1。
+        # v4 已把 'tools' 从默认包列表移除，这里再显式限定一次以免回归。
+        packages: 'platform-tools'
+
     - name: 接受 Android SDK 许可
       run: yes | sdkmanager --licenses || true
-      
+
     - name: 安装 Android SDK 组件
       run: |
         sdkmanager "build-tools;36.0.0"
         sdkmanager "platforms;android-36"
+        sdkmanager "platforms;android-37.0"
         sdkmanager "ndk;29.0.13113456"
         
     - name: 缓存 Gradle 包
